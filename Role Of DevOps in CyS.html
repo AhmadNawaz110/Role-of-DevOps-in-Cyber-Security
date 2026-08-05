@@ -1,0 +1,2853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevSecOps — The Role of DevOps in Cybersecurity</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-one-light.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script>
+
+<style>
+:root {
+  --bg-0: #f4f6fb;
+  --bg-1: #ffffff;
+  --bg-2: #eef1f7;
+  --surface: rgba(255, 255, 255, 0.75);
+  --surface-2: rgba(255, 255, 255, 0.92);
+  --border: rgba(15, 23, 42, 0.10);
+  --border-strong: rgba(8, 145, 178, 0.45);
+  --fg: #0f172a;
+  --fg-dim: #475569;
+  --fg-mute: #94a3b8;
+  --accent: #0891b2;
+  --accent-2: #059669;
+  --accent-3: #dc2626;
+  --accent-4: #d97706;
+  --accent-5: #7c3aed;
+  --glow: 0 0 24px rgba(8, 145, 178, 0.18);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0; padding: 0;
+  background: var(--bg-0);
+  color: var(--fg);
+  font-family: 'Manrope', sans-serif;
+  overflow: hidden;
+  height: 100vh; width: 100vw;
+}
+
+::selection { background: var(--accent); color: #fff; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgba(15,23,42,0.04); }
+::-webkit-scrollbar-thumb { background: rgba(8,145,178,0.3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(8,145,178,0.5); }
+
+/* ============ BACKGROUND ============ */
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(8, 145, 178, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(8, 145, 178, 0.06) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+}
+.bg-glow {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(8, 145, 178, 0.12), transparent 40%),
+    radial-gradient(circle at 88% 82%, rgba(220, 38, 38, 0.06), transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(5, 150, 105, 0.04), transparent 60%);
+}
+.scan-line {
+  position: fixed; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  z-index: 100; pointer-events: none; opacity: 0.5;
+  animation: scan 9s linear infinite;
+}
+@keyframes scan { 0% { transform: translateY(0); } 100% { transform: translateY(100vh); } }
+
+/* ============ HEADER ============ */
+.progress-bar {
+  position: fixed; top: 0; left: 0; right: 0; height: 3px;
+  background: rgba(15,23,42,0.06); z-index: 200;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  width: 0%; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 14px rgba(8,145,178,0.5);
+}
+
+.app-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 150;
+  padding: 14px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(180deg, rgba(244,246,251,0.92), rgba(244,246,251,0));
+  pointer-events: none;
+}
+.app-header > * { pointer-events: auto; }
+
+.brand { display: flex; align-items: center; gap: 12px; font-family: 'Space Grotesk', sans-serif; }
+.brand-mark {
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  border: 1px solid var(--border-strong); border-radius: 9px;
+  background: linear-gradient(135deg, rgba(8,145,178,0.12), rgba(5,150,105,0.08)); color: var(--accent);
+  font-size: 17px;
+  box-shadow: 0 4px 12px rgba(8,145,178,0.18);
+  position: relative; overflow: hidden;
+}
+.brand-mark::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.4) 50%, transparent 60%);
+  animation: shine 4s linear infinite;
+}
+@keyframes shine { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.brand-text { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1; color: var(--fg); }
+.brand-sub { font-size: 10px; color: var(--fg-dim); letter-spacing: 0.18em; margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
+
+.header-tools { display: flex; gap: 8px; align-items: center; }
+.tool-btn {
+  background: rgba(255,255,255,0.7);
+  border: 1px solid var(--border);
+  color: var(--fg-dim);
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  display: grid; place-items: center;
+  cursor: pointer; transition: all 0.2s;
+  font-size: 13px;
+  box-shadow: 0 2px 6px rgba(15,23,42,0.04);
+}
+.tool-btn:hover {
+  border-color: var(--accent); color: var(--accent);
+  background: rgba(8, 145, 178, 0.08);
+  box-shadow: 0 4px 14px rgba(8,145,178,0.18);
+}
+
+/* ============ DECK ============ */
+.deck { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+
+.slide {
+  position: absolute; inset: 0;
+  padding: 78px 56px 90px;
+  display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transform: translateX(50px) scale(0.99);
+  transition: opacity 0.45s ease, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto; overflow-x: hidden;
+  z-index: 2;
+}
+.slide.active { opacity: 1; pointer-events: auto; transform: translateX(0) scale(1); }
+.slide.prev { transform: translateX(-50px) scale(0.99); }
+
+/* Glass cards */
+.glass {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 20px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+.glass-strong {
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 28px rgba(15,23,42,0.08), 0 0 0 1px rgba(8,145,178,0.08), inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+/* Typography */
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: 0.22em;
+  color: var(--accent); text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.eyebrow::before {
+  content: ''; width: 24px; height: 1px; background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+}
+.slide-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700; letter-spacing: -0.02em; line-height: 1.05;
+  color: var(--fg);
+}
+.slide-title .accent { color: var(--accent); }
+.slide-title .accent-2 { color: var(--accent-2); }
+.slide-title .accent-3 { color: var(--accent-3); }
+
+.module-num {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 180px; font-weight: 700;
+  background: linear-gradient(180deg, rgba(8,145,178,0.35), rgba(8,145,178,0.05));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 0.85; letter-spacing: -0.05em;
+}
+.module-num.red {
+  background: linear-gradient(180deg, rgba(220,38,38,0.35), rgba(220,38,38,0.05));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.terminal-text { font-family: 'JetBrains Mono', monospace; }
+
+/* ============ NAV ============ */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+  padding: 16px 28px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  background: linear-gradient(0deg, rgba(244,246,251,0.95), rgba(244,246,251,0));
+  pointer-events: none;
+}
+.bottom-nav > * { pointer-events: auto; }
+
+.nav-group { display: flex; align-items: center; gap: 8px; }
+.nav-btn {
+  background: rgba(255,255,255,0.85);
+  border: 1px solid var(--border);
+  color: var(--fg);
+  padding: 8px 14px;
+  border-radius: 9px;
+  cursor: pointer; transition: all 0.2s;
+  font-size: 12px; font-weight: 600;
+  display: inline-flex; align-items: center; gap: 8px;
+  letter-spacing: 0.04em;
+  font-family: 'JetBrains Mono', monospace;
+  box-shadow: 0 2px 8px rgba(15,23,42,0.06);
+}
+.nav-btn:hover { border-color: var(--accent); color: var(--accent); box-shadow: 0 4px 14px rgba(8,145,178,0.2); }
+.nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.nav-btn:disabled:hover { border-color: var(--border); color: var(--fg); box-shadow: 0 2px 8px rgba(15,23,42,0.06); }
+.nav-btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-color: var(--accent); color: #fff; }
+.nav-btn.primary:hover { box-shadow: 0 6px 18px rgba(8,145,178,0.4); transform: translateY(-1px); }
+
+.slide-counter {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; color: var(--fg-dim);
+  padding: 0 12px;
+  letter-spacing: 0.08em;
+}
+.slide-counter .current { color: var(--accent); font-weight: 700; }
+
+/* Slide dots */
+.dots { display: flex; gap: 4px; align-items: center; max-width: 40vw; overflow-x: auto; padding: 4px 0; }
+.dots::-webkit-scrollbar { display: none; }
+.dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(15,23,42,0.15);
+  cursor: pointer; transition: all 0.2s;
+  flex-shrink: 0;
+}
+.dot:hover { background: rgba(8,145,178,0.5); }
+.dot.active { background: var(--accent); box-shadow: 0 0 8px rgba(8,145,178,0.6); transform: scale(1.3); }
+.dot.visited { background: rgba(5,150,105,0.5); }
+
+/* ============ HERO ============ */
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0; overflow: hidden;
+}
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  animation: float 12s ease-in-out infinite;
+}
+.hero-orb.o1 { width: 500px; height: 500px; background: var(--accent); top: -100px; left: -100px; }
+.hero-orb.o2 { width: 400px; height: 400px; background: var(--accent-3); bottom: -100px; right: -50px; animation-delay: -4s; opacity: 0.35; }
+.hero-orb.o3 { width: 350px; height: 350px; background: var(--accent-2); top: 40%; left: 50%; animation-delay: -8s; opacity: 0.3; }
+@keyframes float {
+  0%, 100% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(40px,-30px) scale(1.05); }
+  66% { transform: translate(-30px,40px) scale(0.95); }
+}
+
+.hero-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(48px, 8vw, 120px);
+  font-weight: 700; line-height: 0.95; letter-spacing: -0.04em;
+  color: var(--fg);
+}
+.hero-title .gradient {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 50%, var(--accent) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+  animation: gradient 6s ease infinite;
+}
+@keyframes gradient { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+.tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 11px; border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  background: rgba(8,145,178,0.1); color: var(--accent);
+  border: 1px solid rgba(8,145,178,0.25);
+  letter-spacing: 0.08em;
+}
+.tag.red { background: rgba(220,38,38,0.1); color: var(--accent-3); border-color: rgba(220,38,38,0.3); }
+.tag.green { background: rgba(5,150,105,0.1); color: var(--accent-2); border-color: rgba(5,150,105,0.3); }
+.tag.amber { background: rgba(217,119,6,0.1); color: var(--accent-4); border-color: rgba(217,119,6,0.3); }
+
+/* ============ COMPONENTS ============ */
+.stat-card {
+  padding: 18px;
+  background: linear-gradient(180deg, rgba(8,145,178,0.06), rgba(8,145,178,0));
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  position: relative; overflow: hidden;
+  transition: all 0.3s;
+}
+.stat-card:hover { border-color: var(--border-strong); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(8,145,178,0.12); }
+.stat-card .num {
+  font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+  font-size: 38px; line-height: 1; color: var(--accent);
+}
+.stat-card .num.red { color: var(--accent-3); }
+.stat-card .num.green { color: var(--accent-2); }
+.stat-card .num.amber { color: var(--accent-4); }
+.stat-card .label { font-size: 11px; color: var(--fg-dim); margin-top: 6px; letter-spacing: 0.06em; text-transform: uppercase; }
+.stat-card .desc { font-size: 12px; color: var(--fg-dim); margin-top: 8px; line-height: 1.4; }
+
+.list-item {
+  display: flex; gap: 12px; padding: 10px 0;
+  border-bottom: 1px solid rgba(15,23,42,0.05);
+}
+.list-item:last-child { border-bottom: none; }
+.list-item .icon {
+  width: 32px; height: 32px; flex-shrink: 0;
+  display: grid; place-items: center;
+  border-radius: 8px; background: rgba(8,145,178,0.1);
+  color: var(--accent); font-size: 13px;
+}
+.list-item .icon.red { background: rgba(220,38,38,0.1); color: var(--accent-3); }
+.list-item .icon.green { background: rgba(5,150,105,0.1); color: var(--accent-2); }
+.list-item .icon.amber { background: rgba(217,119,6,0.1); color: var(--accent-4); }
+.list-item .title { font-weight: 600; font-size: 13px; color: var(--fg); }
+.list-item .desc { font-size: 11.5px; color: var(--fg-dim); line-height: 1.5; margin-top: 2px; }
+
+/* Lifecycle cards */
+.lifecycle-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.stage-card {
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  cursor: pointer; transition: all 0.3s;
+  position: relative; overflow: hidden;
+}
+.stage-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--accent); opacity: 0.5;
+  transition: opacity 0.3s;
+}
+.stage-card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(8,145,178,0.12); }
+.stage-card:hover::before { opacity: 1; box-shadow: 0 0 12px var(--accent); }
+.stage-card.active { border-color: var(--accent); background: rgba(8,145,178,0.06); }
+.stage-card.active::before { opacity: 1; box-shadow: 0 0 12px var(--accent); }
+.stage-card .stage-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  color: var(--accent); letter-spacing: 0.15em;
+}
+.stage-card .stage-name {
+  font-family: 'Space Grotesk', sans-serif; font-weight: 600;
+  font-size: 18px; margin-top: 4px;
+  display: flex; align-items: center; gap: 8px;
+  color: var(--fg);
+}
+.stage-card .stage-icon { color: var(--accent); font-size: 16px; }
+
+/* Pipeline */
+.pipeline-track {
+  position: relative;
+  display: flex; align-items: center;
+  padding: 30px 0;
+}
+.pipeline-line {
+  position: absolute; top: 50%; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transform: translateY(-50%);
+  box-shadow: 0 0 12px rgba(8,145,178,0.4);
+}
+.pipeline-pulse {
+  position: absolute; top: 50%; left: 0; height: 3px; width: 80px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  transform: translateY(-50%);
+  animation: pipeline-flow 4s linear infinite;
+}
+@keyframes pipeline-flow {
+  0% { left: -10%; }
+  100% { left: 110%; }
+}
+.pipeline-node {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  position: relative; z-index: 2;
+}
+.pipeline-node .icon-circle {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--bg-1);
+  border: 2px solid var(--border-strong);
+  display: grid; place-items: center;
+  color: var(--accent); font-size: 20px;
+  transition: all 0.3s;
+  position: relative;
+}
+.pipeline-node:hover .icon-circle {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px var(--accent);
+  background: rgba(8,145,178,0.1);
+}
+.pipeline-node .label {
+  margin-top: 10px; font-size: 11px; font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+  color: var(--fg-dim);
+}
+.pipeline-node.gate .icon-circle { color: var(--accent-3); border-color: var(--accent-3); }
+.pipeline-node.gate .label { color: var(--accent-3); }
+
+/* Quiz */
+.quiz-option {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer; transition: all 0.2s;
+  margin-bottom: 8px;
+}
+.quiz-option:hover { border-color: var(--border-strong); background: rgba(8,145,178,0.05); }
+.quiz-option.correct { border-color: var(--accent-2); background: rgba(5,150,105,0.1); }
+.quiz-option.wrong { border-color: var(--accent-3); background: rgba(220,38,38,0.1); }
+.quiz-option .opt-letter {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: rgba(15,23,42,0.06);
+  display: grid; place-items: center;
+  font-family: 'JetBrains Mono', monospace; font-weight: 700;
+  font-size: 12px; color: var(--fg-dim);
+}
+.quiz-option.correct .opt-letter { background: var(--accent-2); color: #fff; }
+.quiz-option.wrong .opt-letter { background: var(--accent-3); color: #fff; }
+.quiz-option .opt-text { font-size: 13.5px; flex: 1; color: var(--fg); }
+
+/* Code blocks */
+pre[class*="language-"] {
+  background: #0f172a !important;
+  border: 1px solid rgba(8,145,178,0.3) !important;
+  border-radius: 12px !important;
+  font-size: 12px !important;
+  margin: 0 !important;
+  padding: 18px !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  color: #e2e8f0 !important;
+  text-shadow: none !important;
+}
+pre[class*="language-"] code { color: #e2e8f0 !important; text-shadow: none !important; }
+.token.comment, .token.prolog, .token.doctype, .token.cdata { color: #64748b !important; }
+.token.punctuation { color: #94a3b8 !important; }
+.token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol { color: #f472b6 !important; }
+.token.selector, .token.attr-name, .token.string, .token.char, .token.builtin { color: #86efac !important; }
+.token.operator, .token.entity, .token.url, .language-css .token.string, .style .token.string { color: #fbbf24 !important; }
+.token.atrule, .token.attr-value, .token.keyword { color: #38bdf8 !important; }
+.token.function, .token.class-name { color: #c084fc !important; }
+.token.regex, .token.important, .token.variable { color: #fb923c !important; }
+
+.code-block {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(15,23,42,0.12);
+}
+.code-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px;
+  background: #1e293b;
+  border: 1px solid rgba(8,145,178,0.3);
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #94a3b8;
+}
+.code-header .dots { display: flex; gap: 5px; }
+.code-header .dots span {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+}
+.code-header .dots span:nth-child(1) { background: #dc2626; }
+.code-header .dots span:nth-child(2) { background: #d97706; }
+.code-header .dots span:nth-child(3) { background: #059669; }
+.code-block pre { border-radius: 0 0 12px 12px !important; border-top: none !important; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(8px);
+  display: none; align-items: center; justify-content: center;
+  padding: 40px;
+}
+.modal-overlay.show { display: flex; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-content {
+  max-width: 800px; width: 100%; max-height: 80vh;
+  background: var(--bg-1);
+  border: 1px solid var(--border-strong);
+  border-radius: 18px;
+  padding: 28px;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(15,23,42,0.2), 0 0 40px rgba(8,145,178,0.1);
+  color: var(--fg);
+}
+
+/* Speaker notes */
+.notes-panel {
+  position: fixed; right: 0; top: 0; bottom: 0;
+  width: 380px; z-index: 250;
+  background: var(--bg-1);
+  border-left: 1px solid var(--border-strong);
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  padding: 80px 24px 24px;
+  overflow-y: auto;
+  box-shadow: -20px 0 40px rgba(15,23,42,0.08);
+}
+.notes-panel.show { transform: translateX(0); }
+
+/* Tool grid */
+.tool-card {
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: all 0.3s;
+  cursor: default;
+}
+.tool-card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(8,145,178,0.1); }
+.tool-card .tool-name {
+  font-family: 'Space Grotesk', sans-serif; font-weight: 600;
+  font-size: 14px; color: var(--fg);
+  display: flex; align-items: center; gap: 8px;
+}
+.tool-card .tool-cat {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px; color: var(--accent);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  margin-top: 4px;
+}
+.tool-card .tool-desc { font-size: 11.5px; color: var(--fg-dim); margin-top: 8px; line-height: 1.5; }
+
+/* Timeline */
+.timeline-item {
+  display: flex; gap: 16px; padding: 12px 0;
+  position: relative;
+}
+.timeline-item::before {
+  content: ''; position: absolute; left: 7px; top: 28px; bottom: -12px;
+  width: 1px; background: rgba(8,145,178,0.3);
+}
+.timeline-item:last-child::before { display: none; }
+.timeline-item .dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--bg-1); border: 2px solid var(--accent);
+  flex-shrink: 0; margin-top: 4px;
+  box-shadow: 0 0 8px rgba(8,145,178,0.5);
+  position: relative; z-index: 1;
+}
+.timeline-item.red .dot { border-color: var(--accent-3); box-shadow: 0 0 8px rgba(220,38,38,0.5); }
+.timeline-item .time {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  color: var(--accent); letter-spacing: 0.06em;
+}
+.timeline-item.red .time { color: var(--accent-3); }
+.timeline-item .event { font-size: 13px; color: var(--fg); margin-top: 3px; line-height: 1.5; }
+
+/* Badge */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 5px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.06em;
+  background: rgba(8,145,178,0.1); color: var(--accent);
+  border: 1px solid rgba(8,145,178,0.25);
+}
+.badge.red { background: rgba(220,38,38,0.1); color: var(--accent-3); border-color: rgba(220,38,38,0.3); }
+.badge.green { background: rgba(5,150,105,0.1); color: var(--accent-2); border-color: rgba(5,150,105,0.3); }
+.badge.amber { background: rgba(217,119,6,0.1); color: var(--accent-4); border-color: rgba(217,119,6,0.3); }
+.badge.violet { background: rgba(124,58,237,0.1); color: var(--accent-5); border-color: rgba(124,58,237,0.3); }
+
+/* Comparison table */
+.comp-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.comp-cell {
+  padding: 12px;
+  background: rgba(15,23,42,0.02);
+  border: 1px solid rgba(15,23,42,0.06);
+  border-radius: 10px;
+  font-size: 12px;
+  color: var(--fg);
+}
+.comp-cell.head {
+  background: rgba(8,145,178,0.06);
+  border-color: rgba(8,145,178,0.25);
+  font-weight: 600; text-align: center;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* Search */
+.search-input {
+  width: 100%;
+  background: rgba(244,246,251,0.8);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--fg);
+  font-size: 14px;
+  font-family: 'Manrope', sans-serif;
+  outline: none;
+  transition: all 0.2s;
+}
+.search-input:focus { border-color: var(--accent); box-shadow: 0 0 14px rgba(8,145,178,0.2); }
+.search-result {
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+.search-result:hover { background: rgba(8,145,178,0.06); border-color: var(--border); }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--bg-1);
+  border: 1px solid var(--border-strong);
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--fg);
+  z-index: 400;
+  opacity: 0; pointer-events: none;
+  transition: all 0.3s;
+  box-shadow: 0 8px 24px rgba(15,23,42,0.15), 0 0 20px rgba(8,145,178,0.2);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Help dialog */
+.help-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.help-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px;
+  background: rgba(15,23,42,0.03);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--fg);
+}
+.help-item kbd {
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(8,145,178,0.1);
+  border: 1px solid rgba(8,145,178,0.25);
+  color: var(--accent);
+  padding: 2px 7px;
+  border-radius: 5px;
+  font-size: 11px;
+}
+
+/* Print */
+@media print {
+  .app-header, .bottom-nav, .progress-bar, .scan-line, .notes-panel, .bg-grid, .bg-glow { display: none !important; }
+  .slide { position: relative !important; opacity: 1 !important; transform: none !important; page-break-after: always; overflow: visible !important; }
+  body { overflow: visible; height: auto; background: #fff; }
+  .deck { overflow: visible; }
+  pre[class*="language-"] { color: #fff !important; }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .slide { padding: 70px 24px 90px; }
+  .lifecycle-grid { grid-template-columns: repeat(2, 1fr); }
+  .module-num { font-size: 120px; }
+  .hero-title { font-size: clamp(36px, 6vw, 80px); }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="scan-line"></div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<header class="app-header">
+  <div class="brand">
+    <div class="brand-mark"><i class="fa-solid fa-shield-halved"></i></div>
+    <div>
+      <div class="brand-text">DevSecOps / Secure by Design</div>
+      <div class="brand-sub">v2.4 // CYBERSEC KEYNOTE</div>
+    </div>
+  </div>
+  <div class="header-tools">
+    <button class="tool-btn" id="searchBtn" title="Search (Ctrl+K)"><i class="fa-solid fa-magnifying-glass"></i></button>
+    <button class="tool-btn" id="glossaryBtn" title="Glossary (G)"><i class="fa-solid fa-book"></i></button>
+    <button class="tool-btn" id="refsBtn" title="References (R)"><i class="fa-solid fa-quote-right"></i></button>
+    <button class="tool-btn" id="notesBtn" title="Speaker Notes (N)"><i class="fa-solid fa-comment-dots"></i></button>
+    <button class="tool-btn" id="fullscreenBtn" title="Fullscreen (F)"><i class="fa-solid fa-expand"></i></button>
+    <button class="tool-btn" id="helpBtn" title="Shortcuts (?)"><i class="fa-solid fa-keyboard"></i></button>
+  </div>
+</header>
+
+<main class="deck" id="deck">
+
+<!-- ============ SLIDE 1: HERO ============ -->
+<section class="slide active" data-title="Welcome">
+  <div class="hero-bg">
+    <div class="hero-orb o1"></div>
+    <div class="hero-orb o2"></div>
+    <div class="hero-orb o3"></div>
+  </div>
+  <div class="relative z-10 flex flex-col h-full justify-center">
+    <div class="flex items-center gap-3 mb-6">
+      <span class="tag"><i class="fa-solid fa-circle text-[6px]"></i> LIVE KEYNOTE</span>
+      <span class="tag red"><i class="fa-solid fa-lock"></i> SECURE SDLC</span>
+      <span class="tag green"><i class="fa-solid fa-infinity"></i> CONTINUOUS</span>
+    </div>
+    <div class="eyebrow mb-5">A Cybersecurity Masterclass // 15 Modules // 30 Slides</div>
+    <h1 class="hero-title">
+      <span class="block">The Role of</span>
+      <span class="block gradient">DevOps in</span>
+      <span class="block">Cybersecurity.</span>
+    </h1>
+    <p class="mt-8 text-lg text-[var(--fg-dim)] max-w-2xl leading-relaxed">
+      From <span class="text-[var(--accent)] font-semibold">Shift-Left</span> to <span class="text-[var(--accent-2)] font-semibold">Continuous Compliance</span> —
+      a complete journey through DevSecOps, secure pipelines, supply chain integrity, and modern defense-in-depth.
+    </p>
+    <div class="mt-10 flex flex-wrap gap-3">
+      <span class="badge"><i class="fa-brands fa-github"></i> 30 Slides</span>
+      <span class="badge green"><i class="fa-solid fa-shield-halved"></i> 15 Modules</span>
+      <span class="badge amber"><i class="fa-solid fa-puzzle-piece"></i> Interactive Quiz</span>
+      <span class="badge violet"><i class="fa-solid fa-code"></i> Live Code Examples</span>
+      <span class="badge red"><i class="fa-solid fa-flag"></i> 6 Case Studies</span>
+    </div>
+    <div class="mt-12 flex items-center gap-6 text-xs text-[var(--fg-mute)] font-mono">
+      <span><i class="fa-solid fa-arrow-right mr-2 text-[var(--accent)]"></i>Press → or Space to begin</span>
+      <span><i class="fa-solid fa-keyboard mr-2 text-[var(--accent)]"></i>? for shortcuts</span>
+    </div>
+  </div>
+  <div class="absolute bottom-10 right-10 text-right text-xs text-[var(--fg-mute)] font-mono">
+    <div>PRESENTED BY</div>
+    <div class="text-[var(--fg-dim)] mt-1">Senior Cybersecurity Faculty</div>
+    <div class="text-[var(--accent)] mt-1">// DevSecOps Architecture Group</div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 2: AGENDA ============ -->
+<section class="slide" data-title="Agenda">
+  <div class="eyebrow mb-3">Table of Contents</div>
+  <h2 class="slide-title text-5xl mb-6">15 Modules. <span class="accent">One Mission.</span></h2>
+  <div class="grid grid-cols-3 gap-3 flex-1">
+    <div class="glass p-4"><div class="text-[var(--accent)] font-mono text-xs mb-1">01</div><div class="font-semibold text-sm">Introduction to DevOps</div><div class="text-xs text-[var(--fg-dim)] mt-1">Definition, evolution, lifecycle, principles</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent)] font-mono text-xs mb-1">02</div><div class="font-semibold text-sm">Why Cybersecurity Needs DevOps</div><div class="text-xs text-[var(--fg-dim)] mt-1">Attack landscape, zero trust, shared responsibility</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent)] font-mono text-xs mb-1">03</div><div class="font-semibold text-sm">DevSecOps Foundations</div><div class="text-xs text-[var(--fg-dim)] mt-1">Shift left/right, secure SDLC, security as code</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent)] font-mono text-xs mb-1">04</div><div class="font-semibold text-sm">Lifecycle with Security</div><div class="text-xs text-[var(--fg-dim)] mt-1">Plan → Monitor: 8 stages, interactive</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent)] font-mono text-xs mb-1">05</div><div class="font-semibold text-sm">Security at Every Stage</div><div class="text-xs text-[var(--fg-dim)] mt-1">Attack vectors, MITRE ATT&CK, defenses</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent)] font-mono text-xs mb-1">06</div><div class="font-semibold text-sm">CI/CD Pipeline Security</div><div class="text-xs text-[var(--fg-dim)] mt-1">SAST, DAST, SCA, SBOM, signing</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent)] font-mono text-xs mb-1">07</div><div class="font-semibold text-sm">Containers & Kubernetes</div><div class="text-xs text-[var(--fg-dim)] mt-1">Runtime, RBAC, network policies, escape</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent)] font-mono text-xs mb-1">08</div><div class="font-semibold text-sm">Infrastructure as Code</div><div class="text-xs text-[var(--fg-dim)] mt-1">Terraform, Ansible, misconfigurations</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent)] font-mono text-xs mb-1">09</div><div class="font-semibold text-sm">Cloud DevSecOps</div><div class="text-xs text-[var(--fg-dim)] mt-1">AWS, Azure, GCP, CSPM, CNAPP</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent)] font-mono text-xs mb-1">10</div><div class="font-semibold text-sm">Supply Chain Security</div><div class="text-xs text-[var(--fg-dim)] mt-1">SolarWinds, Log4Shell, SLSA, Sigstore</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent)] font-mono text-xs mb-1">11</div><div class="font-semibold text-sm">Security Automation</div><div class="text-xs text-[var(--fg-dim)] mt-1">SOAR, playbooks, AI/LLM security</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent)] font-mono text-xs mb-1">12</div><div class="font-semibold text-sm">Tools Ecosystem</div><div class="text-xs text-[var(--fg-dim)] mt-1">50+ tools categorized by domain</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent)] font-mono text-xs mb-1">13</div><div class="font-semibold text-sm">Case Studies</div><div class="text-xs text-[var(--fg-dim)] mt-1">SolarWinds, Capital One, Equifax, Uber</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent)] font-mono text-xs mb-1">14</div><div class="font-semibold text-sm">Best Practices</div><div class="text-xs text-[var(--fg-dim)] mt-1">Maturity model, zero trust, metrics</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-3)] font-mono text-xs mb-1">15</div><div class="font-semibold text-sm">Interactive Learning</div><div class="text-xs text-[var(--fg-dim)] mt-1">Quizzes, drag-drop, scenario labs</div></div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 3: MODULE 1 DIVIDER ============ -->
+<section class="slide" data-title="Module 1: DevOps">
+  <div class="flex h-full items-center">
+    <div class="grid grid-cols-12 gap-8 w-full items-center">
+      <div class="col-span-5"><div class="module-num">01</div></div>
+      <div class="col-span-7">
+        <div class="eyebrow mb-4">Module 01 // Foundations</div>
+        <h2 class="slide-title text-6xl mb-5">Introduction <br>to <span class="accent">DevOps</span></h2>
+        <p class="text-[var(--fg-dim)] text-base leading-relaxed max-w-xl mb-8">
+          Before we secure DevOps, we must understand what DevOps is — its origins, lifecycle, principles, and the cultural shift that turned software delivery into a continuous, automated discipline.
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <span class="badge">Definition</span>
+          <span class="badge">Evolution</span>
+          <span class="badge">Waterfall → Agile → DevOps</span>
+          <span class="badge">CALMS</span>
+          <span class="badge">Infinity Loop</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 4: DEVOPS DEFINITION ============ -->
+<section class="slide" data-title="What is DevOps?">
+  <div class="eyebrow mb-3">Module 01 · Definition</div>
+  <h2 class="slide-title text-4xl mb-6">What is <span class="accent">DevOps?</span></h2>
+  <div class="grid grid-cols-12 gap-5 flex-1">
+    <div class="col-span-7 glass-strong p-7 flex flex-col justify-center">
+      <i class="fa-solid fa-quote-left text-3xl text-[var(--accent)] mb-3 opacity-50"></i>
+      <p class="text-xl leading-relaxed text-[var(--fg)] font-light">
+        DevOps is the <span class="text-[var(--accent)] font-semibold">combination of cultural philosophies, practices, and tools</span> that increases an organization's ability to deliver applications and services at <span class="text-[var(--accent-2)] font-semibold">high velocity</span> — evolving and improving products faster than organizations using traditional software development and infrastructure management processes.
+      </p>
+      <div class="mt-5 text-xs text-[var(--fg-mute)] font-mono">— AWS / NIST SP 800-180C adapted</div>
+      <div class="mt-6 grid grid-cols-3 gap-3">
+        <div class="text-center p-3 rounded-lg bg-[rgba(8,145,178,0.06)]">
+          <div class="text-2xl font-bold text-[var(--accent)] font-mono">200×</div>
+          <div class="text-[10px] text-[var(--fg-dim)] mt-1 uppercase tracking-wider">Deploy Frequency</div>
+        </div>
+        <div class="text-center p-3 rounded-lg bg-[rgba(5,150,105,0.06)]">
+          <div class="text-2xl font-bold text-[var(--accent-2)] font-mono">24×</div>
+          <div class="text-[10px] text-[var(--fg-dim)] mt-1 uppercase tracking-wider">Faster Recovery</div>
+        </div>
+        <div class="text-center p-3 rounded-lg bg-[rgba(217,119,6,0.06)]">
+          <div class="text-2xl font-bold text-[var(--accent-4)] font-mono">3×</div>
+          <div class="text-[10px] text-[var(--fg-dim)] mt-1 uppercase tracking-wider">Lower Change Fail</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-span-5 flex flex-col gap-3">
+      <div class="glass p-4">
+        <div class="text-[var(--accent)] font-mono text-xs mb-2">CULTURE</div>
+        <div class="text-sm text-[var(--fg)]">Collaboration, shared ownership, blameless post-mortems, continuous learning</div>
+      </div>
+      <div class="glass p-4">
+        <div class="text-[var(--accent-2)] font-mono text-xs mb-2">PRACTICE</div>
+        <div class="text-sm text-[var(--fg)]">CI/CD, IaC, automated testing, monitoring, microservices, observability</div>
+      </div>
+      <div class="glass p-4">
+        <div class="text-[var(--accent-4)] font-mono text-xs mb-2">TOOLS</div>
+        <div class="text-sm text-[var(--fg)]">Git, Jenkins, Docker, Kubernetes, Terraform, Prometheus, Grafana</div>
+      </div>
+      <div class="glass p-4">
+        <div class="text-[var(--accent-3)] font-mono text-xs mb-2">OUTCOME</div>
+        <div class="text-sm text-[var(--fg)]">Faster time-to-market, higher quality, reliability, security, scalability</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 5: EVOLUTION ============ -->
+<section class="slide" data-title="Evolution of Software Development">
+  <div class="eyebrow mb-3">Module 01 · Evolution</div>
+  <h2 class="slide-title text-4xl mb-6">From <span class="accent-3">Waterfall</span> to <span class="accent-4">Agile</span> to <span class="accent">DevOps</span></h2>
+  <div class="grid grid-cols-3 gap-5 flex-1">
+    <div class="glass p-6 flex flex-col">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 rounded-xl bg-[rgba(220,38,38,0.1)] grid place-items-center text-[var(--accent-3)] text-xl"><i class="fa-solid fa-water"></i></div>
+        <div>
+          <div class="font-mono text-xs text-[var(--accent-3)]">1970s</div>
+          <div class="font-semibold text-lg text-[var(--fg)]">Waterfall</div>
+        </div>
+      </div>
+      <svg viewBox="0 0 200 80" class="w-full mb-3">
+        <defs><marker id="arr1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#dc2626"/></marker></defs>
+        <path d="M10,15 L60,15 L60,40 L110,40 L110,65 L190,65" stroke="#dc2626" stroke-width="2" fill="none" marker-end="url(#arr1)"/>
+        <circle cx="10" cy="15" r="4" fill="#dc2626"/><text x="20" y="12" fill="#475569" font-size="8" font-family="monospace">Requirements</text>
+        <circle cx="60" cy="40" r="4" fill="#dc2626"/><text x="70" y="37" fill="#475569" font-size="8" font-family="monospace">Design</text>
+        <circle cx="110" cy="65" r="4" fill="#dc2626"/><text x="120" y="62" fill="#475569" font-size="8" font-family="monospace">Build → Test → Deploy</text>
+      </svg>
+      <div class="text-xs space-y-2 text-[var(--fg-dim)]">
+        <div>• Sequential, rigid phases</div>
+        <div>• Long release cycles (months–years)</div>
+        <div>• Late integration, late testing</div>
+        <div>• Hard to adapt to change</div>
+      </div>
+    </div>
+    <div class="glass p-6 flex flex-col">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 rounded-xl bg-[rgba(217,119,6,0.1)] grid place-items-center text-[var(--accent-4)] text-xl"><i class="fa-solid fa-repeat"></i></div>
+        <div>
+          <div class="font-mono text-xs text-[var(--accent-4)]">2001</div>
+          <div class="font-semibold text-lg text-[var(--fg)]">Agile</div>
+        </div>
+      </div>
+      <svg viewBox="0 0 200 80" class="w-full mb-3">
+        <defs><marker id="arr2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#d97706"/></marker></defs>
+        <g stroke="#d97706" stroke-width="2" fill="none">
+          <path d="M10,40 Q40,10 70,40 T130,40 T190,40" marker-end="url(#arr2)"/>
+        </g>
+        <circle cx="10" cy="40" r="3" fill="#d97706"/>
+        <circle cx="70" cy="40" r="3" fill="#d97706"/>
+        <circle cx="130" cy="40" r="3" fill="#d97706"/>
+        <text x="20" y="65" fill="#475569" font-size="8" font-family="monospace">Sprint 1</text>
+        <text x="80" y="65" fill="#475569" font-size="8" font-family="monospace">Sprint 2</text>
+        <text x="140" y="65" fill="#475569" font-size="8" font-family="monospace">Sprint 3</text>
+      </svg>
+      <div class="text-xs space-y-2 text-[var(--fg-dim)]">
+        <div>• Iterative 2–4 week sprints</div>
+        <div>• Continuous feedback loops</div>
+        <div>• Cross-functional teams</div>
+        <div>• Working software over docs</div>
+      </div>
+    </div>
+    <div class="glass-strong p-6 flex flex-col" style="border-color: var(--accent); box-shadow: 0 0 24px rgba(8,145,178,0.15);">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 rounded-xl bg-[rgba(8,145,178,0.1)] grid place-items-center text-[var(--accent)] text-xl"><i class="fa-solid fa-infinity"></i></div>
+        <div>
+          <div class="font-mono text-xs text-[var(--accent)]">2009</div>
+          <div class="font-semibold text-lg text-[var(--fg)]">DevOps</div>
+        </div>
+      </div>
+      <svg viewBox="0 0 200 80" class="w-full mb-3">
+        <path d="M50,40 C50,20 80,20 100,40 C120,60 150,60 150,40 C150,20 120,20 100,40 C80,60 50,60 50,40 Z" stroke="#0891b2" stroke-width="2" fill="none"/>
+        <circle cx="50" cy="40" r="4" fill="#0891b2"/>
+        <circle cx="150" cy="40" r="4" fill="#059669"/>
+        <text x="20" y="15" fill="#0891b2" font-size="9" font-family="monospace">DEV</text>
+        <text x="160" y="15" fill="#059669" font-size="9" font-family="monospace">OPS</text>
+      </svg>
+      <div class="text-xs space-y-2 text-[var(--fg-dim)]">
+        <div>• Continuous everything</div>
+        <div>• Automation-first mindset</div>
+        <div>• Dev + Ops collaboration</div>
+        <div>• Infrastructure as Code</div>
+      </div>
+    </div>
+  </div>
+  <div class="glass p-4 mt-4 flex items-center justify-between text-sm">
+    <div><span class="text-[var(--fg-dim)]">Why DevOps emerged:</span> <span class="text-[var(--fg)]">Cloud-scale demand, microservices complexity, need for velocity + stability</span></div>
+    <div class="flex gap-2"><span class="badge">CALMS</span><span class="badge green">DORA Metrics</span></div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 6: WATERFALL vs AGILE vs DEVOPS ============ -->
+<section class="slide" data-title="Waterfall vs Agile vs DevOps">
+  <div class="eyebrow mb-3">Module 01 · Comparison</div>
+  <h2 class="slide-title text-4xl mb-5">Side-by-Side <span class="accent">Comparison</span></h2>
+  <div class="glass p-5">
+    <div class="grid grid-cols-12 gap-3 text-xs font-mono uppercase tracking-wider text-[var(--fg-dim)] pb-3 border-b border-[var(--border)] mb-2">
+      <div class="col-span-3">Dimension</div>
+      <div class="col-span-3 text-[var(--accent-3)]">Waterfall</div>
+      <div class="col-span-3 text-[var(--accent-4)]">Agile</div>
+      <div class="col-span-3 text-[var(--accent)]">DevOps</div>
+    </div>
+    <div class="space-y-1.5 text-sm">
+      <div class="grid grid-cols-12 gap-3 py-2 hover:bg-[rgba(8,145,178,0.04)] rounded">
+        <div class="col-span-3 text-[var(--fg-dim)]">Release Cycle</div>
+        <div class="col-span-3 text-[var(--fg)]">Months – Years</div>
+        <div class="col-span-3 text-[var(--fg)]">2 – 4 weeks</div>
+        <div class="col-span-3 text-[var(--accent)]">Multiple per day</div>
+      </div>
+      <div class="grid grid-cols-12 gap-3 py-2 hover:bg-[rgba(8,145,178,0.04)] rounded">
+        <div class="col-span-3 text-[var(--fg-dim)]">Testing</div>
+        <div class="col-span-3 text-[var(--fg)]">End of cycle</div>
+        <div class="col-span-3 text-[var(--fg)]">Each sprint</div>
+        <div class="col-span-3 text-[var(--accent)]">Continuous / automated</div>
+      </div>
+      <div class="grid grid-cols-12 gap-3 py-2 hover:bg-[rgba(8,145,178,0.04)] rounded">
+        <div class="col-span-3 text-[var(--fg-dim)]">Deployment</div>
+        <div class="col-span-3 text-[var(--fg)]">Manual, risky</div>
+        <div class="col-span-3 text-[var(--fg)]">Sprint-end</div>
+        <div class="col-span-3 text-[var(--accent)]">Pipeline-driven</div>
+      </div>
+      <div class="grid grid-cols-12 gap-3 py-2 hover:bg-[rgba(8,145,178,0.04)] rounded">
+        <div class="col-span-3 text-[var(--fg-dim)]">Infrastructure</div>
+        <div class="col-span-3 text-[var(--fg)]">Manual, ticket-based</div>
+        <div class="col-span-3 text-[var(--fg)]">Semi-automated</div>
+        <div class="col-span-3 text-[var(--accent)]">IaC, version-controlled</div>
+      </div>
+      <div class="grid grid-cols-12 gap-3 py-2 hover:bg-[rgba(8,145,178,0.04)] rounded">
+        <div class="col-span-3 text-[var(--fg-dim)]">Culture</div>
+        <div class="col-span-3 text-[var(--fg)]">Silos (Dev vs Ops vs Sec)</div>
+        <div class="col-span-3 text-[var(--fg)]">Cross-functional teams</div>
+        <div class="col-span-3 text-[var(--accent)]">Shared ownership</div>
+      </div>
+      <div class="grid grid-cols-12 gap-3 py-2 hover:bg-[rgba(8,145,178,0.04)] rounded">
+        <div class="col-span-3 text-[var(--fg-dim)]">Feedback Loop</div>
+        <div class="col-span-3 text-[var(--fg)]">Post-release</div>
+        <div class="col-span-3 text-[var(--fg)]">Sprint review</div>
+        <div class="col-span-3 text-[var(--accent)]">Real-time monitoring</div>
+      </div>
+      <div class="grid grid-cols-12 gap-3 py-2 hover:bg-[rgba(8,145,178,0.04)] rounded">
+        <div class="col-span-3 text-[var(--fg-dim)]">Failure Recovery</div>
+        <div class="col-span-3 text-[var(--fg)]">Hours – Days</div>
+        <div class="col-span-3 text-[var(--fg)]">Hours</div>
+        <div class="col-span-3 text-[var(--accent-2)]">Minutes (MTTR ↓ 24×)</div>
+      </div>
+      <div class="grid grid-cols-12 gap-3 py-2 hover:bg-[rgba(8,145,178,0.04)] rounded">
+        <div class="col-span-3 text-[var(--fg-dim)]">Security Involvement</div>
+        <div class="col-span-3 text-[var(--fg)]">Pre-release audit</div>
+        <div class="col-span-3 text-[var(--fg)]">Sprint sign-off</div>
+        <div class="col-span-3 text-[var(--accent-2)]">Embedded, automated</div>
+      </div>
+    </div>
+  </div>
+  <div class="grid grid-cols-4 gap-3 mt-4">
+    <div class="stat-card"><div class="num">106×</div><div class="label">Lead Time</div><div class="text-[10px] text-[var(--fg-dim)] mt-1">DevOps vs low performers</div></div>
+    <div class="stat-card"><div class="num green">208×</div><div class="label">Deploy Frequency</div><div class="text-[10px] text-[var(--fg-dim)] mt-1">DORA Elite tier</div></div>
+    <div class="stat-card"><div class="num amber">7×</div><div class="label">Change Fail Rate</div><div class="text-[10px] text-[var(--fg-dim)] mt-1">Lower with DevOps</div></div>
+    <div class="stat-card"><div class="num red">2600×</div><div class="label">MTTR</div><div class="text-[10px] text-[var(--fg-dim)] mt-1">Faster recovery</div></div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 7: DEVOPS LIFECYCLE ============ -->
+<section class="slide" data-title="DevOps Lifecycle">
+  <div class="eyebrow mb-3">Module 01 · Lifecycle</div>
+  <h2 class="slide-title text-4xl mb-4">The DevOps <span class="accent">Infinity Loop</span></h2>
+  <div class="grid grid-cols-12 gap-5 flex-1 items-center">
+    <div class="col-span-7 relative">
+      <svg viewBox="0 0 600 380" class="w-full">
+        <defs>
+          <linearGradient id="loopGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#0891b2"/>
+            <stop offset="50%" stop-color="#059669"/>
+            <stop offset="100%" stop-color="#0891b2"/>
+          </linearGradient>
+          <filter id="glow1"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <path d="M 100 190 C 100 80, 220 80, 300 190 C 380 300, 500 300, 500 190 C 500 80, 380 80, 300 190 C 220 300, 100 300, 100 190 Z" 
+              stroke="url(#loopGrad)" stroke-width="3" fill="none" filter="url(#glow1)" opacity="0.8"/>
+        <circle r="6" fill="#0891b2" filter="url(#glow1)">
+          <animateMotion dur="8s" repeatCount="indefinite"
+            path="M 100 190 C 100 80, 220 80, 300 190 C 380 300, 500 300, 500 190 C 500 80, 380 80, 300 190 C 220 300, 100 300, 100 190 Z"/>
+        </circle>
+        <g font-family="monospace" font-size="11" fill="#0f172a">
+          <g><circle cx="100" cy="190" r="22" fill="#fff" stroke="#0891b2" stroke-width="2"/><text x="100" y="194" text-anchor="middle">PLAN</text></g>
+          <g><circle cx="180" cy="100" r="22" fill="#fff" stroke="#0891b2" stroke-width="2"/><text x="180" y="104" text-anchor="middle">CODE</text></g>
+          <g><circle cx="300" cy="80" r="22" fill="#fff" stroke="#0891b2" stroke-width="2"/><text x="300" y="84" text-anchor="middle">BUILD</text></g>
+          <g><circle cx="420" cy="100" r="22" fill="#fff" stroke="#0891b2" stroke-width="2"/><text x="420" y="104" text-anchor="middle">TEST</text></g>
+          <g><circle cx="500" cy="190" r="22" fill="#fff" stroke="#059669" stroke-width="2"/><text x="500" y="194" text-anchor="middle">RELEASE</text></g>
+          <g><circle cx="420" cy="280" r="22" fill="#fff" stroke="#059669" stroke-width="2"/><text x="420" y="284" text-anchor="middle">DEPLOY</text></g>
+          <g><circle cx="300" cy="300" r="22" fill="#fff" stroke="#059669" stroke-width="2"/><text x="300" y="304" text-anchor="middle">OPERATE</text></g>
+          <g><circle cx="180" cy="280" r="22" fill="#fff" stroke="#059669" stroke-width="2"/><text x="180" y="284" text-anchor="middle">MONITOR</text></g>
+        </g>
+        <text x="180" y="200" font-family="monospace" font-size="14" fill="#0891b2" font-weight="bold" opacity="0.6">DEV</text>
+        <text x="380" y="200" font-family="monospace" font-size="14" fill="#059669" font-weight="bold" opacity="0.6">OPS</text>
+      </svg>
+    </div>
+    <div class="col-span-5 space-y-3">
+      <div class="glass p-4">
+        <div class="text-[var(--accent)] font-mono text-xs mb-2">PLAN → BUILD (DEV)</div>
+        <div class="text-sm text-[var(--fg-dim)]">Requirements, version control, CI builds, automated tests, artifact creation</div>
+      </div>
+      <div class="glass p-4">
+        <div class="text-[var(--accent-2)] font-mono text-xs mb-2">RELEASE → MONITOR (OPS)</div>
+        <div class="text-sm text-[var(--fg-dim)]">Deployment, infrastructure provisioning, observability, incident response, feedback</div>
+      </div>
+      <div class="glass p-4 border-l-2" style="border-left-color: var(--accent-3);">
+        <div class="text-[var(--accent-3)] font-mono text-xs mb-2">CONTINUOUS LOOP</div>
+        <div class="text-sm text-[var(--fg-dim)]">Feedback from monitoring feeds back into planning — driving the next iteration</div>
+      </div>
+      <div class="glass p-4">
+        <div class="text-[var(--accent-4)] font-mono text-xs mb-2">CALMS PRINCIPLES</div>
+        <div class="text-sm text-[var(--fg-dim)]">Culture · Automation · Lean · Measurement · Sharing</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 8: MODULE 2 DIVIDER ============ -->
+<section class="slide" data-title="Module 2: Why Security Needs DevOps">
+  <div class="flex h-full items-center">
+    <div class="grid grid-cols-12 gap-8 w-full items-center">
+      <div class="col-span-5"><div class="module-num red">02</div></div>
+      <div class="col-span-7">
+        <div class="eyebrow mb-4" style="color: var(--accent-3);">Module 02 // The Problem</div>
+        <h2 class="slide-title text-6xl mb-5">Why Cybersecurity <br><span class="accent-3">Needs DevOps</span></h2>
+        <p class="text-[var(--fg-dim)] text-base leading-relaxed max-w-xl mb-8">
+          The velocity of modern delivery has outpaced traditional security. Supply chains, cloud-native complexity, and zero-trust demands require a fundamentally new approach.
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <span class="badge red">Attack Surface</span>
+          <span class="badge red">Supply Chain</span>
+          <span class="badge red">Cloud-Native</span>
+          <span class="badge red">Zero Trust</span>
+          <span class="badge red">Shared Responsibility</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 9: ATTACK LANDSCAPE STATS ============ -->
+<section class="slide" data-title="Modern Attack Landscape">
+  <div class="eyebrow mb-3">Module 02 · Threat Landscape</div>
+  <h2 class="slide-title text-4xl mb-5">The Modern <span class="accent-3">Attack Landscape</span></h2>
+  <div class="grid grid-cols-4 gap-3 mb-4">
+    <div class="stat-card"><div class="num red">2,365</div><div class="label">Cyber Attacks / Day</div><div class="desc">Average across enterprises</div></div>
+    <div class="stat-card"><div class="num red">$4.88M</div><div class="label">Avg Breach Cost</div><div class="desc">IBM 2024 report</div></div>
+    <div class="stat-card"><div class="num amber">277</div><div class="label">Days to Identify</div><div class="desc">Mean breach dwell time</div></div>
+    <div class="stat-card"><div class="num amber">741%</div><div class="label">Supply Chain Growth</div><div class="desc">2019–2023 attacks</div></div>
+  </div>
+  <div class="grid grid-cols-12 gap-4 flex-1">
+    <div class="col-span-7 glass p-5">
+      <div class="text-sm font-semibold mb-3 flex items-center gap-2 text-[var(--fg)]"><i class="fa-solid fa-chart-area text-[var(--accent-3)]"></i> Top Attack Vectors (2024)</div>
+      <div class="space-y-3">
+        <div>
+          <div class="flex justify-between text-xs mb-1"><span class="text-[var(--fg)]">Phishing & Social Engineering</span><span class="text-[var(--accent-3)] font-mono">41%</span></div>
+          <div class="h-2 bg-[rgba(15,23,42,0.06)] rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-[var(--accent-3)] to-[var(--accent-4)]" style="width: 41%;"></div></div>
+        </div>
+        <div>
+          <div class="flex justify-between text-xs mb-1"><span class="text-[var(--fg)]">Stolen / Compromised Credentials</span><span class="text-[var(--accent-3)] font-mono">38%</span></div>
+          <div class="h-2 bg-[rgba(15,23,42,0.06)] rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-[var(--accent-3)] to-[var(--accent-4)]" style="width: 38%;"></div></div>
+        </div>
+        <div>
+          <div class="flex justify-between text-xs mb-1"><span class="text-[var(--fg)]">Supply Chain Compromise</span><span class="text-[var(--accent-4)] font-mono">19%</span></div>
+          <div class="h-2 bg-[rgba(15,23,42,0.06)] rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-[var(--accent-4)] to-[var(--accent-2)]" style="width: 19%;"></div></div>
+        </div>
+        <div>
+          <div class="flex justify-between text-xs mb-1"><span class="text-[var(--fg)]">Misconfiguration</span><span class="text-[var(--accent-4)] font-mono">17%</span></div>
+          <div class="h-2 bg-[rgba(15,23,42,0.06)] rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-[var(--accent-4)] to-[var(--accent-2)]" style="width: 17%;"></div></div>
+        </div>
+        <div>
+          <div class="flex justify-between text-xs mb-1"><span class="text-[var(--fg)]">Vulnerable Third-Party Software</span><span class="text-[var(--accent-2)] font-mono">15%</span></div>
+          <div class="h-2 bg-[rgba(15,23,42,0.06)] rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent)]" style="width: 15%;"></div></div>
+        </div>
+        <div>
+          <div class="flex justify-between text-xs mb-1"><span class="text-[var(--fg)]">Insider Threat</span><span class="text-[var(--accent-2)] font-mono">12%</span></div>
+          <div class="h-2 bg-[rgba(15,23,42,0.06)] rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent)]" style="width: 12%;"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-span-5 glass p-5">
+      <div class="text-sm font-semibold mb-3 flex items-center gap-2 text-[var(--fg)]"><i class="fa-solid fa-triangle-exclamation text-[var(--accent-3)]"></i> Why Traditional Security Fails</div>
+      <div class="space-y-2 text-xs">
+        <div class="list-item"><div class="icon red"><i class="fa-solid fa-bolt"></i></div><div><div class="title">Velocity Mismatch</div><div class="desc">Security gates can't keep up with daily deploys</div></div></div>
+        <div class="list-item"><div class="icon red"><i class="fa-solid fa-cloud"></i></div><div><div class="title">Cloud-Native Complexity</div><div class="desc">Dynamic, ephemeral, API-driven infrastructure</div></div></div>
+        <div class="list-item"><div class="icon red"><i class="fa-solid fa-link"></i></div><div><div class="title">Supply Chain Sprawl</div><div class="desc">Hundreds of OSS dependencies per app</div></div></div>
+        <div class="list-item"><div class="icon red"><i class="fa-solid fa-user-secret"></i></div><div><div class="title">Human Error</div><div class="desc">82% of breaches involve a human element</div></div></div>
+        <div class="list-item"><div class="icon red"><i class="fa-solid fa-shield-virus"></i></div><div><div class="title">Perimeter Erosion</div><div class="desc">No clear boundary — Zero Trust required</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 10: MODULE 3 DIVIDER ============ -->
+<section class="slide" data-title="Module 3: DevSecOps">
+  <div class="flex h-full items-center">
+    <div class="grid grid-cols-12 gap-8 w-full items-center">
+      <div class="col-span-5"><div class="module-num">03</div></div>
+      <div class="col-span-7">
+        <div class="eyebrow mb-4">Module 03 // The Solution</div>
+        <h2 class="slide-title text-6xl mb-5"><span class="accent">DevSecOps</span></h2>
+        <p class="text-[var(--fg-dim)] text-base leading-relaxed max-w-xl mb-8">
+          Integrating security into every facet of the DevOps lifecycle — not as a gate, but as a continuous, automated, measurable practice.
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <span class="badge">Shift Left</span>
+          <span class="badge green">Shift Right</span>
+          <span class="badge">Secure SDLC</span>
+          <span class="badge amber">Security as Code</span>
+          <span class="badge violet">Continuous Compliance</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 11: SHIFT LEFT vs SHIFT RIGHT ============ -->
+<section class="slide" data-title="Shift Left vs Shift Right">
+  <div class="eyebrow mb-3">Module 03 · Direction</div>
+  <h2 class="slide-title text-4xl mb-5">Shift <span class="accent">Left</span> · Shift <span class="accent-2">Right</span></h2>
+  <div class="grid grid-cols-2 gap-5 flex-1">
+    <div class="glass-strong p-6" style="border-color: var(--accent);">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3"><i class="fa-solid fa-arrow-left text-2xl text-[var(--accent)]"></i><div><div class="font-mono text-xs text-[var(--accent)]">PRE-PRODUCTION</div><div class="font-semibold text-xl text-[var(--fg)]">Shift Left</div></div></div>
+        <span class="badge">Earlier</span>
+      </div>
+      <p class="text-sm text-[var(--fg-dim)] mb-4">Embed security in design, code, and build phases. Catch vulnerabilities when they're cheapest to fix — 10×–100× cheaper than in production.</p>
+      <div class="space-y-2">
+        <div class="list-item"><div class="icon"><i class="fa-solid fa-pen-ruler"></i></div><div><div class="title">Threat Modeling</div><div class="desc">STRIDE / DREAD during design</div></div></div>
+        <div class="list-item"><div class="icon"><i class="fa-solid fa-code"></i></div><div><div class="title">SAST & Secret Scanning</div><div class="desc">In IDE, pre-commit, PR checks</div></div></div>
+        <div class="list-item"><div class="icon"><i class="fa-solid fa-cubes"></i></div><div><div class="title">SCA & License Compliance</div><div class="desc">Dependency analysis</div></div></div>
+        <div class="list-item"><div class="icon"><i class="fa-solid fa-file-code"></i></div><div><div class="title">IaC Scanning</div><div class="desc">Terraform, K8s manifests</div></div></div>
+        <div class="list-item"><div class="icon"><i class="fa-solid fa-vial-circle-check"></i></div><div><div class="title">Pre-merge Security Gates</div><div class="desc">Quality + security thresholds</div></div></div>
+      </div>
+    </div>
+    <div class="glass-strong p-6" style="border-color: var(--accent-2);">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3"><i class="fa-solid fa-arrow-right text-2xl text-[var(--accent-2)]"></i><div><div class="font-mono text-xs text-[var(--accent-2)]">PRODUCTION</div><div class="font-semibold text-xl text-[var(--fg)]">Shift Right</div></div></div>
+        <span class="badge green">Runtime</span>
+      </div>
+      <p class="text-sm text-[var(--fg-dim)] mb-4">Defend what's actually running. Detect, respond, and learn from production telemetry, runtime behavior, and active threats.</p>
+      <div class="space-y-2">
+        <div class="list-item"><div class="icon green"><i class="fa-solid fa-radar"></i></div><div><div class="title">DAST & Fuzzing</div><div class="desc">Live app testing in staging</div></div></div>
+        <div class="list-item"><div class="icon green"><i class="fa-solid fa-shield-halved"></i></div><div><div class="title">Runtime Protection</div><div class="desc">RASP, EDR, container runtime</div></div></div>
+        <div class="list-item"><div class="icon green"><i class="fa-solid fa-chart-line"></i></div><div><div class="title">Continuous Monitoring</div><div class="desc">SIEM, SOAR, observability</div></div></div>
+        <div class="list-item"><div class="icon green"><i class="fa-solid fa-magnifying-glass-chart"></i></div><div><div class="title">Threat Detection & IR</div><div class="desc">Anomaly, IOC, automated response</div></div></div>
+        <div class="list-item"><div class="icon green"><i class="fa-solid fa-rotate"></i></div><div><div class="title">Feedback Loops</div><div class="desc">Production → planning</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="glass p-4 mt-4 flex items-center justify-between">
+    <div class="text-sm text-[var(--fg)]"><span class="text-[var(--accent)] font-semibold">Both directions are required.</span> <span class="text-[var(--fg-dim)]">Shift-left prevents. Shift-right detects & responds.</span></div>
+    <div class="font-mono text-xs text-[var(--fg-dim)]">$1 prevention ≈ $10 detection ≈ $100 response</div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 12: SECURE SDLC FLOW ============ -->
+<section class="slide" data-title="Secure SDLC">
+  <div class="eyebrow mb-3">Module 03 · Secure SDLC</div>
+  <h2 class="slide-title text-4xl mb-5">The <span class="accent">Secure SDLC</span> Pipeline</h2>
+  <div class="glass p-6">
+    <div class="pipeline-track">
+      <div class="pipeline-line"></div>
+      <div class="pipeline-pulse"></div>
+      <div class="pipeline-node"><div class="icon-circle"><i class="fa-solid fa-lightbulb"></i></div><div class="label">PLAN</div></div>
+      <div class="pipeline-node gate"><div class="icon-circle"><i class="fa-solid fa-shield-halved"></i></div><div class="label">THREAT MODEL</div></div>
+      <div class="pipeline-node"><div class="icon-circle"><i class="fa-solid fa-code"></i></div><div class="label">CODE</div></div>
+      <div class="pipeline-node gate"><div class="icon-circle"><i class="fa-solid fa-magnifying-glass"></i></div><div class="label">SAST/SECRET</div></div>
+      <div class="pipeline-node"><div class="icon-circle"><i class="fa-solid fa-hammer"></i></div><div class="label">BUILD</div></div>
+      <div class="pipeline-node gate"><div class="icon-circle"><i class="fa-solid fa-box"></i></div><div class="label">CONTAINER SCAN</div></div>
+      <div class="pipeline-node"><div class="icon-circle"><i class="fa-solid fa-vial"></i></div><div class="label">TEST</div></div>
+      <div class="pipeline-node gate"><div class="icon-circle"><i class="fa-solid fa-bug"></i></div><div class="label">DAST/SCA</div></div>
+      <div class="pipeline-node"><div class="icon-circle"><i class="fa-solid fa-rocket"></i></div><div class="label">RELEASE</div></div>
+      <div class="pipeline-node gate"><div class="icon-circle"><i class="fa-solid fa-signature"></i></div><div class="label">SIGN/SBOM</div></div>
+      <div class="pipeline-node"><div class="icon-circle"><i class="fa-solid fa-server"></i></div><div class="label">DEPLOY</div></div>
+      <div class="pipeline-node gate"><div class="icon-circle"><i class="fa-solid fa-radar"></i></div><div class="label">RUNTIME</div></div>
+      <div class="pipeline-node"><div class="icon-circle"><i class="fa-solid fa-chart-line"></i></div><div class="label">MONITOR</div></div>
+    </div>
+  </div>
+  <div class="grid grid-cols-4 gap-3 mt-4">
+    <div class="glass p-4"><div class="text-[var(--accent)] font-mono text-xs mb-1">SECURITY AS CODE</div><div class="text-xs text-[var(--fg-dim)]">Policies, configs, and tests versioned alongside application code</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-2)] font-mono text-xs mb-1">CONTINUOUS SECURITY</div><div class="text-xs text-[var(--fg-dim)]">Automated scans on every commit, PR, build, and release</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-4)] font-mono text-xs mb-1">CONTINUOUS COMPLIANCE</div><div class="text-xs text-[var(--fg-dim)]">Evidence auto-collected for SOC 2, ISO 27001, PCI-DSS</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-5)] font-mono text-xs mb-1">SECURITY GATES</div><div class="text-xs text-[var(--fg-dim)]">Quality thresholds enforce pass/fail decisions</div></div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 13: MODULE 4 - INTERACTIVE LIFECYCLE ============ -->
+<section class="slide" data-title="Module 4: Lifecycle with Security">
+  <div class="eyebrow mb-3">Module 04 · Interactive Lifecycle</div>
+  <h2 class="slide-title text-4xl mb-4">8 Stages. <span class="accent">Click to Explore.</span></h2>
+  <div class="lifecycle-grid mb-4" id="lifecycleGrid">
+    <div class="stage-card active" data-stage="plan"><div class="stage-num">01</div><div class="stage-name"><i class="fa-solid fa-lightbulb stage-icon"></i> Plan</div></div>
+    <div class="stage-card" data-stage="code"><div class="stage-num">02</div><div class="stage-name"><i class="fa-solid fa-code stage-icon"></i> Code</div></div>
+    <div class="stage-card" data-stage="build"><div class="stage-num">03</div><div class="stage-name"><i class="fa-solid fa-hammer stage-icon"></i> Build</div></div>
+    <div class="stage-card" data-stage="test"><div class="stage-num">04</div><div class="stage-name"><i class="fa-solid fa-vial stage-icon"></i> Test</div></div>
+    <div class="stage-card" data-stage="release"><div class="stage-num">05</div><div class="stage-name"><i class="fa-solid fa-rocket stage-icon"></i> Release</div></div>
+    <div class="stage-card" data-stage="deploy"><div class="stage-num">06</div><div class="stage-name"><i class="fa-solid fa-server stage-icon"></i> Deploy</div></div>
+    <div class="stage-card" data-stage="operate"><div class="stage-num">07</div><div class="stage-name"><i class="fa-solid fa-gears stage-icon"></i> Operate</div></div>
+    <div class="stage-card" data-stage="monitor"><div class="stage-num">08</div><div class="stage-name"><i class="fa-solid fa-chart-line stage-icon"></i> Monitor</div></div>
+  </div>
+  <div class="grid grid-cols-12 gap-4 flex-1" id="stageDetail"></div>
+</section>
+
+<!-- ============ SLIDE 14: MODULE 5 - CODE STAGE DEEP DIVE ============ -->
+<section class="slide" data-title="Module 5: Code Stage Security">
+  <div class="eyebrow mb-3">Module 05 · Deep Dive: CODE Stage</div>
+  <h2 class="slide-title text-4xl mb-4">Anatomy of a <span class="accent-3">Secret Leak</span></h2>
+  <div class="grid grid-cols-12 gap-4 flex-1">
+    <div class="col-span-7 glass p-5">
+      <div class="text-sm font-semibold mb-3 flex items-center gap-2 text-[var(--fg)]"><i class="fa-solid fa-route text-[var(--accent-3)]"></i> Attack Path DFD</div>
+      <svg viewBox="0 0 580 280" class="w-full">
+        <defs>
+          <marker id="arrowRed" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#dc2626"/></marker>
+          <marker id="arrowCyan" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#0891b2"/></marker>
+        </defs>
+        <g font-family="monospace" font-size="9" text-anchor="middle">
+          <rect x="10" y="120" width="90" height="50" rx="8" fill="#fff" stroke="#0891b2" stroke-width="1.5"/><text x="55" y="140" fill="#0891b2">DEVELOPER</text><text x="55" y="155" fill="#475569" font-size="9">hardcodes key</text>
+          <rect x="140" y="120" width="90" height="50" rx="8" fill="#fff" stroke="#0891b2" stroke-width="1.5"/><text x="185" y="140" fill="#0891b2">GIT PUSH</text><text x="185" y="155" fill="#475569" font-size="9">commit</text>
+          <rect x="270" y="120" width="90" height="50" rx="8" fill="#fff" stroke="#d97706" stroke-width="1.5"/><text x="315" y="140" fill="#d97706">REPOSITORY</text><text x="315" y="155" fill="#475569" font-size="9">GitHub/GitLab</text>
+          <rect x="400" y="120" width="90" height="50" rx="8" fill="#fff" stroke="#dc2626" stroke-width="1.5"/><text x="445" y="140" fill="#dc2626">SECRET LEAK</text><text x="445" y="155" fill="#475569" font-size="9">public/forked</text>
+          <rect x="510" y="120" width="60" height="50" rx="8" fill="#fff" stroke="#dc2626" stroke-width="2"/><text x="540" y="140" fill="#dc2626" font-size="11">ATTACKER</text><text x="540" y="155" fill="#475569" font-size="9">scraper</text>
+        </g>
+        <line x1="100" y1="145" x2="140" y2="145" stroke="#dc2626" stroke-width="2" marker-end="url(#arrowRed)"/>
+        <line x1="230" y1="145" x2="270" y2="145" stroke="#dc2626" stroke-width="2" marker-end="url(#arrowRed)"/>
+        <line x1="360" y1="145" x2="400" y2="145" stroke="#dc2626" stroke-width="2" marker-end="url(#arrowRed)"/>
+        <line x1="490" y1="145" x2="510" y2="145" stroke="#dc2626" stroke-width="2" marker-end="url(#arrowRed)"/>
+        <g font-family="monospace" font-size="10" text-anchor="middle">
+          <rect x="140" y="20" width="90" height="50" rx="8" fill="#fff" stroke="#059669" stroke-width="1.5" stroke-dasharray="4,2"/><text x="185" y="40" fill="#059669">PRE-COMMIT</text><text x="185" y="55" fill="#475569" font-size="9">hook</text>
+          <rect x="270" y="20" width="90" height="50" rx="8" fill="#fff" stroke="#059669" stroke-width="1.5" stroke-dasharray="4,2"/><text x="315" y="40" fill="#059669">SECRET SCAN</text><text x="315" y="55" fill="#475569" font-size="9">GitGuardian</text>
+          <rect x="400" y="20" width="90" height="50" rx="8" fill="#fff" stroke="#059669" stroke-width="1.5" stroke-dasharray="4,2"/><text x="445" y="40" fill="#059669">VAULT</text><text x="445" y="55" fill="#475569" font-size="9">no hardcoded</text>
+        </g>
+        <line x1="185" y1="70" x2="185" y2="120" stroke="#059669" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arrowCyan)"/>
+        <line x1="315" y1="70" x2="315" y2="120" stroke="#059669" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arrowCyan)"/>
+        <line x1="445" y1="70" x2="445" y2="120" stroke="#059669" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arrowCyan)"/>
+        <g><rect x="140" y="220" width="350" height="40" rx="8" fill="rgba(124,58,237,0.06)" stroke="#7c3aed" stroke-width="1" stroke-dasharray="4,2"/><text x="315" y="237" text-anchor="middle" fill="#7c3aed" font-family="monospace" font-size="10">MITRE ATT&CK: T1552.001 - Credentials In Files</text><text x="315" y="252" text-anchor="middle" fill="#475569" font-size="9">Unsecured Credentials → Initial Access → Lateral Movement</text></g>
+      </svg>
+    </div>
+    <div class="col-span-5 space-y-3">
+      <div class="glass p-4">
+        <div class="text-[var(--accent-3)] font-mono text-xs mb-2">VULNERABILITIES</div>
+        <div class="text-xs space-y-1 text-[var(--fg-dim)]">
+          <div>• Hardcoded API keys, tokens, certs</div>
+          <div>• AWS keys in .env committed to repo</div>
+          <div>• Database connection strings</div>
+          <div>• JWT signing secrets</div>
+        </div>
+      </div>
+      <div class="glass p-4">
+        <div class="text-[var(--accent-2)] font-mono text-xs mb-2">DETECTION TOOLS</div>
+        <div class="grid grid-cols-2 gap-2 text-xs text-[var(--fg)]">
+          <div class="flex items-center gap-2"><i class="fa-solid fa-check text-[var(--accent-2)]"></i> GitGuardian</div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-check text-[var(--accent-2)]"></i> TruffleHog</div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-check text-[var(--accent-2)]"></i> Gitleaks</div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-check text-[var(--accent-2)]"></i> SonarQube</div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-check text-[var(--accent-2)]"></i> Semgrep</div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-check text-[var(--accent-2)]"></i> Checkmarx</div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-check text-[var(--accent-2)]"></i> CodeQL</div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-check text-[var(--accent-2)]"></i> Snyk Code</div>
+        </div>
+      </div>
+      <div class="glass p-4">
+        <div class="text-[var(--accent)] font-mono text-xs mb-2">PREVENTION</div>
+        <div class="text-xs space-y-1 text-[var(--fg-dim)]">
+          <div>• Use HashiCorp Vault / AWS Secrets Manager</div>
+          <div>• Pre-commit hooks (gitleaks)</div>
+          <div>• Short-lived tokens, OIDC federation</div>
+          <div>• Auto-rotation + just-in-time access</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 15: MODULE 6 - CI/CD PIPELINE ============ -->
+<section class="slide" data-title="Module 6: CI/CD Pipeline Security">
+  <div class="eyebrow mb-3">Module 06 · Animated Pipeline</div>
+  <h2 class="slide-title text-4xl mb-4">CI/CD with <span class="accent">Security Checkpoints</span></h2>
+  <div class="glass p-6 mb-4">
+    <svg viewBox="0 0 1100 180" class="w-full">
+      <defs>
+        <linearGradient id="pipeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#0891b2"/>
+          <stop offset="50%" stop-color="#059669"/>
+          <stop offset="100%" stop-color="#0891b2"/>
+        </linearGradient>
+      </defs>
+      <rect x="20" y="80" width="1060" height="20" rx="10" fill="rgba(8,145,178,0.08)" stroke="url(#pipeGrad)" stroke-width="1.5"/>
+      <rect x="0" y="80" width="120" height="20" rx="10" fill="url(#pipeGrad)" opacity="0.5">
+        <animate attributeName="x" from="-120" to="1100" dur="4s" repeatCount="indefinite"/>
+      </rect>
+      <g font-family="monospace" font-size="10" text-anchor="middle">
+        <g><circle cx="80" cy="90" r="14" fill="#fff" stroke="#0891b2" stroke-width="2"/><text x="80" y="94" fill="#0891b2">GIT</text><text x="80" y="135" fill="#475569">Commit</text></g>
+        <g><circle cx="180" cy="90" r="14" fill="#fff" stroke="#0891b2" stroke-width="2"/><text x="180" y="94" fill="#0891b2">PR</text><text x="180" y="135" fill="#475569">Trigger</text></g>
+        <g><rect x="240" y="60" width="80" height="40" rx="6" fill="rgba(220,38,38,0.1)" stroke="#dc2626" stroke-width="1.5"/><text x="280" y="75" fill="#dc2626" font-size="9">SECRET</text><text x="280" y="88" fill="#dc2626" font-size="9">SCAN</text></g>
+        <g><rect x="340" y="60" width="80" height="40" rx="6" fill="rgba(220,38,38,0.1)" stroke="#dc2626" stroke-width="1.5"/><text x="380" y="75" fill="#dc2626" font-size="9">SAST</text><text x="380" y="88" fill="#dc2626" font-size="9">STATIC</text></g>
+        <g><rect x="440" y="60" width="80" height="40" rx="6" fill="rgba(220,38,38,0.1)" stroke="#dc2626" stroke-width="1.5"/><text x="480" y="75" fill="#dc2626" font-size="9">SCA</text><text x="480" y="88" fill="#dc2626" font-size="9">DEPEND</text></g>
+        <g><circle cx="600" cy="90" r="14" fill="#fff" stroke="#059669" stroke-width="2"/><text x="600" y="94" fill="#059669">BUILD</text><text x="600" y="135" fill="#475569">Artifact</text></g>
+        <g><rect x="660" y="60" width="90" height="40" rx="6" fill="rgba(220,38,38,0.1)" stroke="#dc2626" stroke-width="1.5"/><text x="705" y="75" fill="#dc2626" font-size="9">CONTAINER</text><text x="705" y="88" fill="#dc2626" font-size="9">SCAN</text></g>
+        <g><rect x="770" y="60" width="80" height="40" rx="6" fill="rgba(220,38,38,0.1)" stroke="#dc2626" stroke-width="1.5"/><text x="810" y="75" fill="#dc2626" font-size="9">IaC</text><text x="810" y="88" fill="#dc2626" font-size="9">SCAN</text></g>
+        <g><rect x="870" y="60" width="100" height="40" rx="6" fill="rgba(217,119,6,0.1)" stroke="#d97706" stroke-width="1.5"/><text x="920" y="75" fill="#d97706" font-size="9">SIGN + SBOM</text><text x="920" y="88" fill="#d97706" font-size="9">PROVENANCE</text></g>
+        <g><circle cx="1030" cy="90" r="14" fill="#fff" stroke="#059669" stroke-width="2"/><text x="1030" y="94" fill="#059669">DEPLOY</text></g>
+        <g><rect x="980" y="20" width="100" height="40" rx="6" fill="rgba(220,38,38,0.1)" stroke="#dc2626" stroke-width="1.5"/><text x="1030" y="35" fill="#dc2626" font-size="9">DAST</text><text x="1030" y="48" fill="#dc2626" font-size="9">STAGING</text></g>
+        <line x1="1030" y1="60" x2="1030" y2="76" stroke="#dc2626" stroke-width="1" stroke-dasharray="3,3"/>
+      </g>
+    </svg>
+  </div>
+  <div class="grid grid-cols-3 gap-3">
+    <div class="glass p-4"><div class="text-[var(--accent-3)] font-mono text-xs mb-2">SAST</div><div class="text-xs text-[var(--fg-dim)]">Static Analysis — finds flaws in source code without running it. Tools: SonarQube, Semgrep, CodeQL, Checkmarx</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-3)] font-mono text-xs mb-2">DAST</div><div class="text-xs text-[var(--fg-dim)]">Dynamic Analysis — attacks running app from outside. Tools: OWASP ZAP, Burp Suite, Nuclei</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-3)] font-mono text-xs mb-2">SCA</div><div class="text-xs text-[var(--fg-dim)]">Software Composition — scans dependencies for CVEs. Tools: Snyk, Dependabot, Trivy, OWASP DC</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-3)] font-mono text-xs mb-2">CONTAINER SCAN</div><div class="text-xs text-[var(--fg-dim)]">Image vulnerability + base image audit. Tools: Trivy, Grype, Clair, Aqua</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-3)] font-mono text-xs mb-2">IaC SCAN</div><div class="text-xs text-[var(--fg-dim)]">Misconfiguration detection. Tools: Checkov, tfsec, KICS, Terrascan</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-4)] font-mono text-xs mb-2">SBOM + SIGN</div><div class="text-xs text-[var(--fg-dim)]">Provenance & integrity. Tools: Syft, Cosign, SLSA, in-toto</div></div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 16: MODULE 7 - CONTAINERS & K8S ============ -->
+<section class="slide" data-title="Module 7: Containers & Kubernetes">
+  <div class="eyebrow mb-3">Module 07 · Cloud-Native Runtime</div>
+  <h2 class="slide-title text-4xl mb-4">Container & <span class="accent">Kubernetes Security</span></h2>
+  <div class="grid grid-cols-12 gap-4 flex-1">
+    <div class="col-span-7 glass p-5">
+      <div class="text-sm font-semibold mb-3 flex items-center gap-2 text-[var(--fg)]"><i class="fa-solid fa-diagram-project text-[var(--accent)]"></i> Kubernetes Architecture & Attack Paths</div>
+      <svg viewBox="0 0 580 380" class="w-full">
+        <defs><marker id="arrR" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#dc2626"/></marker></defs>
+        <g><rect x="20" y="20" width="540" height="100" rx="10" fill="rgba(8,145,178,0.05)" stroke="#0891b2" stroke-width="1.5" stroke-dasharray="4,3"/><text x="30" y="38" fill="#0891b2" font-family="monospace" font-size="10">CONTROL PLANE</text></g>
+        <g font-family="monospace" font-size="9" text-anchor="middle">
+          <rect x="40" y="50" width="100" height="55" rx="6" fill="#fff" stroke="#0891b2"/><text x="90" y="72" fill="#0891b2">API SERVER</text><text x="90" y="88" fill="#475569" font-size="8">exposed</text><text x="90" y="98" fill="#475569" font-size="8">:6443</text>
+          <rect x="160" y="50" width="100" height="55" rx="6" fill="#fff" stroke="#0891b2"/><text x="210" y="72" fill="#0891b2">etcd</text><text x="210" y="88" fill="#475569" font-size="8">secrets store</text><text x="210" y="98" fill="#475569" font-size="8">KV</text>
+          <rect x="280" y="50" width="100" height="55" rx="6" fill="#fff" stroke="#0891b2"/><text x="330" y="72" fill="#0891b2">SCHEDULER</text>
+          <rect x="400" y="50" width="140" height="55" rx="6" fill="#fff" stroke="#0891b2"/><text x="470" y="72" fill="#0891b2">CONTROLLER MGR</text>
+        </g>
+        <g><rect x="20" y="150" width="260" height="220" rx="10" fill="rgba(5,150,105,0.05)" stroke="#059669" stroke-width="1.5" stroke-dasharray="4,3"/><text x="30" y="168" fill="#059669" font-family="monospace" font-size="10">WORKER NODE 1</text></g>
+        <g font-family="monospace" font-size="9" text-anchor="middle">
+          <rect x="40" y="180" width="220" height="30" rx="6" fill="#fff" stroke="#94a3b8"/><text x="150" y="200" fill="#475569">kubelet + kube-proxy</text>
+          <rect x="40" y="220" width="100" height="60" rx="6" fill="#fff" stroke="#dc2626" stroke-width="1.5"/><text x="90" y="240" fill="#dc2626">POD A</text><text x="90" y="255" fill="#475569" font-size="8">privilege:</text><text x="90" y="265" fill="#dc2626" font-size="8">privileged</text>
+          <rect x="160" y="220" width="100" height="60" rx="6" fill="#fff" stroke="#059669" stroke-width="1.5"/><text x="210" y="240" fill="#059669">POD B</text><text x="210" y="255" fill="#475569" font-size="8">non-root</text><text x="210" y="265" fill="#059669" font-size="8">read-only fs</text>
+          <rect x="40" y="295" width="220" height="60" rx="6" fill="rgba(220,38,38,0.06)" stroke="#dc2626" stroke-width="1"/><text x="150" y="315" fill="#dc2626">HOST PATH MOUNT</text><text x="150" y="330" fill="#475569" font-size="8">/var/run/docker.sock</text><text x="150" y="345" fill="#475569" font-size="8">→ ESCAPE!</text>
+        </g>
+        <g><rect x="300" y="150" width="260" height="220" rx="10" fill="rgba(5,150,105,0.05)" stroke="#059669" stroke-width="1.5" stroke-dasharray="4,3"/><text x="310" y="168" fill="#059669" font-family="monospace" font-size="10">WORKER NODE 2</text></g>
+        <g font-family="monospace" font-size="9" text-anchor="middle">
+          <rect x="320" y="180" width="220" height="30" rx="6" fill="#fff" stroke="#94a3b8"/><text x="430" y="200" fill="#475569">kubelet + kube-proxy</text>
+          <rect x="320" y="220" width="100" height="60" rx="6" fill="#fff" stroke="#059669" stroke-width="1.5"/><text x="370" y="240" fill="#059669">POD C</text><text x="370" y="255" fill="#475569" font-size="8">NetworkPolicy</text><text x="370" y="265" fill="#059669" font-size="8">isolated</text>
+          <rect x="440" y="220" width="100" height="60" rx="6" fill="#fff" stroke="#d97706" stroke-width="1.5"/><text x="490" y="240" fill="#d97706">POD D</text><text x="490" y="255" fill="#475569" font-size="8">cryptominer</text><text x="490" y="265" fill="#d97706" font-size="8">suspicious</text>
+          <rect x="320" y="295" width="220" height="60" rx="6" fill="rgba(124,58,237,0.06)" stroke="#7c3aed" stroke-width="1"/><text x="430" y="315" fill="#7c3aed">ADMISSION CONTROL</text><text x="430" y="330" fill="#475569" font-size="8">OPA Gatekeeper</text><text x="430" y="345" fill="#475569" font-size="8">→ blocks bad pods</text>
+        </g>
+        <path d="M 90 280 Q 90 320 150 325" stroke="#dc2626" stroke-width="2" stroke-dasharray="4,2" fill="none" marker-end="url(#arrR)"/>
+        <text x="100" y="305" fill="#dc2626" font-family="monospace" font-size="9">ESCAPE</text>
+      </svg>
+    </div>
+    <div class="col-span-5 space-y-3">
+      <div class="glass p-4">
+        <div class="text-[var(--accent-3)] font-mono text-xs mb-2">ATTACK VECTORS</div>
+        <div class="text-xs space-y-1 text-[var(--fg-dim)]">
+          <div>• Container escape (privileged pods)</div>
+          <div>• Privilege escalation (RBAC abuse)</div>
+          <div>• Malicious images (typosquatting)</div>
+          <div>• Cryptominer injection</div>
+          <div>• Supply chain compromise</div>
+          <div>• Exposed kubelet API (10250)</div>
+          <div>• Service account token theft</div>
+        </div>
+      </div>
+      <div class="glass p-4">
+        <div class="text-[var(--accent-2)] font-mono text-xs mb-2">DEFENSE LAYERS</div>
+        <div class="text-xs space-y-1 text-[var(--fg-dim)]">
+          <div>• Pod Security Standards (restricted)</div>
+          <div>• RBAC: least privilege, no wildcards</div>
+          <div>• Network Policies (default deny)</div>
+          <div>• Admission controllers (OPA/Kyverno)</div>
+          <div>• Image scanning + signing (Cosign)</div>
+          <div>• Runtime protection (Falco)</div>
+          <div>• Secrets via Vault / Sealed Secrets</div>
+        </div>
+      </div>
+      <div class="glass p-4">
+        <div class="text-[var(--accent-4)] font-mono text-xs mb-2">KEY TOOLS</div>
+        <div class="flex flex-wrap gap-2">
+          <span class="badge">Trivy</span><span class="badge">Falco</span><span class="badge">OPA</span><span class="badge">Kyverno</span><span class="badge">kube-bench</span><span class="badge">kube-hunter</span><span class="badge">Cosign</span><span class="badge">Aquasec</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 17: MODULE 8 - IaC SECURITY ============ -->
+<section class="slide" data-title="Module 8: IaC Security">
+  <div class="eyebrow mb-3">Module 08 · Infrastructure as Code</div>
+  <h2 class="slide-title text-4xl mb-4"><span class="accent">IaC</span> Security & Misconfigurations</h2>
+  <div class="grid grid-cols-12 gap-4 flex-1">
+    <div class="col-span-5 space-y-3">
+      <div class="glass p-4">
+        <div class="text-[var(--accent)] font-mono text-xs mb-2">IaC PLATFORMS</div>
+        <div class="grid grid-cols-2 gap-2 text-xs text-[var(--fg)]">
+          <div class="flex items-center gap-2 p-2 rounded bg-[rgba(15,23,42,0.03)]"><i class="fa-solid fa-cube text-[var(--accent)]"></i> Terraform</div>
+          <div class="flex items-center gap-2 p-2 rounded bg-[rgba(15,23,42,0.03)]"><i class="fa-solid fa-cube text-[var(--accent-2)]"></i> Ansible</div>
+          <div class="flex items-center gap-2 p-2 rounded bg-[rgba(15,23,42,0.03)]"><i class="fa-solid fa-cloud text-[var(--accent-4)]"></i> CloudFormation</div>
+          <div class="flex items-center gap-2 p-2 rounded bg-[rgba(15,23,42,0.03)]"><i class="fa-solid fa-code text-[var(--accent-5)]"></i> Bicep</div>
+          <div class="flex items-center gap-2 p-2 rounded bg-[rgba(15,23,42,0.03)]"><i class="fa-solid fa-layer-group text-[var(--accent-3)]"></i> Pulumi</div>
+          <div class="flex items-center gap-2 p-2 rounded bg-[rgba(15,23,42,0.03)]"><i class="fa-solid fa-gear text-[var(--accent)]"></i> Chef / Puppet</div>
+        </div>
+      </div>
+      <div class="glass p-4">
+        <div class="text-[var(--accent-3)] font-mono text-xs mb-2">COMMON MISCONFIGURATIONS</div>
+        <div class="text-xs space-y-2">
+          <div class="list-item"><div class="icon red"><i class="fa-solid fa-key"></i></div><div><div class="title">Over-permissive IAM</div><div class="desc">Wildcards like Action: "*", Resource: "*"</div></div></div>
+          <div class="list-item"><div class="icon red"><i class="fa-solid fa-unlock"></i></div><div><div class="title">Open Security Groups</div><div class="desc">0.0.0.0/0 on 22, 3389, 3306</div></div></div>
+          <div class="list-item"><div class="icon red"><i class="fa-solid fa-database"></i></div><div><div class="title">Public Storage</div><div class="desc">S3 buckets without encryption / public ACLs</div></div></div>
+          <div class="list-item"><div class="icon red"><i class="fa-solid fa-user-shield"></i></div><div><div class="title">Hardcoded Secrets</div><div class="desc">DB passwords in .tf files</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-span-7 space-y-3">
+      <div class="glass p-4">
+        <div class="text-[var(--accent-2)] font-mono text-xs mb-2">SCANNERS</div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><div class="font-semibold text-sm text-[var(--fg)]">Checkov</div><div class="text-xs text-[var(--fg-dim)]">200+ policies for Terraform, K8s, Cloud</div></div>
+          <div><div class="font-semibold text-sm text-[var(--fg)]">tfsec</div><div class="text-xs text-[var(--fg-dim)]">Terraform-focused, now AquaSec</div></div>
+          <div><div class="font-semibold text-sm text-[var(--fg)]">Terrascan</div><div class="text-xs text-[var(--fg-dim)]">Policy-as-code with OPA</div></div>
+          <div><div class="font-semibold text-sm text-[var(--fg)]">KICS</div><div class="text-xs text-[var(--fg-dim)]">Multi-IaC by Checkmarx</div></div>
+        </div>
+      </div>
+      <div class="glass p-4">
+        <div class="text-[var(--accent-4)] font-mono text-xs mb-2">ATTACK PATH DFD</div>
+        <svg viewBox="0 0 580 100" class="w-full">
+          <defs><marker id="arrAmber" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#d97706"/></marker></defs>
+          <g font-family="monospace" font-size="9" text-anchor="middle">
+            <rect x="10" y="30" width="100" height="40" rx="6" fill="#fff" stroke="#0891b2"/><text x="60" y="54" fill="#0891b2">DEVELOPER</text>
+            <rect x="130" y="30" width="100" height="40" rx="6" fill="#fff" stroke="#d97706"/><text x="180" y="48" fill="#d97706">MISCONFIG</text><text x="180" y="60" fill="#475569" font-size="8">SG open</text>
+            <rect x="250" y="30" width="100" height="40" rx="6" fill="#fff" stroke="#d97706"/><text x="300" y="48" fill="#d97706">terraform apply</text><text x="300" y="60" fill="#475569" font-size="8">cloud provisioned</text>
+            <rect x="370" y="30" width="100" height="40" rx="6" fill="#fff" stroke="#dc2626"/><text x="420" y="48" fill="#dc2626">EXPOSED</text><text x="420" y="60" fill="#475569" font-size="8">RDS public</text>
+            <rect x="490" y="30" width="80" height="40" rx="6" fill="#fff" stroke="#dc2626"/><text x="530" y="54" fill="#dc2626">ATTACKER</text>
+          </g>
+          <line x1="110" y1="50" x2="130" y2="50" stroke="#d97706" stroke-width="1.5" marker-end="url(#arrAmber)"/>
+          <line x1="230" y1="50" x2="250" y2="50" stroke="#d97706" stroke-width="1.5" marker-end="url(#arrAmber)"/>
+          <line x1="350" y1="50" x2="370" y2="50" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arrAmber)"/>
+          <line x1="470" y1="50" x2="490" y2="50" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arrAmber)"/>
+        </svg>
+      </div>
+      <div class="glass p-4">
+        <div class="text-[var(--accent-5)] font-mono text-xs mb-2">PREVENTION CHECKLIST</div>
+        <div class="grid grid-cols-2 gap-2 text-xs text-[var(--fg-dim)]">
+          <div>✓ Scan in pre-commit hook</div><div>✓ Block on Critical/High</div>
+          <div>✓ Use OPA/Conftest policies</div><div>✓ State file encryption</div>
+          <div>✓ No secrets in state</div><div>✓ Remote backend + locking</div>
+          <div>✓ PR review required</div><div>✓ Drift detection</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 18: MODULE 9 - CLOUD DEVSECOPS ============ -->
+<section class="slide" data-title="Module 9: Cloud DevSecOps">
+  <div class="eyebrow mb-3">Module 09 · Multi-Cloud Security</div>
+  <h2 class="slide-title text-4xl mb-4"><span class="accent">Cloud</span> DevSecOps</h2>
+  <div class="grid grid-cols-3 gap-3 mb-4">
+    <div class="glass-strong p-5"><div class="flex items-center gap-2 mb-2"><i class="fa-brands fa-aws text-2xl text-[var(--accent-4)]"></i><div class="font-semibold text-[var(--fg)]">AWS</div></div><div class="text-xs space-y-1 text-[var(--fg-dim)]"><div>IAM, KMS, GuardDuty</div><div>Macie, Detective</div><div>Security Hub, Inspector</div><div>Config, CloudTrail</div><div>WAF, Shield, Firewall Mgr</div></div></div>
+    <div class="glass-strong p-5"><div class="flex items-center gap-2 mb-2"><i class="fa-brands fa-microsoft text-2xl text-[var(--accent)]"></i><div class="font-semibold text-[var(--fg)]">Azure</div></div><div class="text-xs space-y-1 text-[var(--fg-dim)]"><div>Entra ID, Key Vault</div><div>Defender for Cloud</div><div>Azure Policy, Sentinel</div><div>Security Center</div><div>Application Gateway WAF</div></div></div>
+    <div class="glass-strong p-5"><div class="flex items-center gap-2 mb-2"><i class="fa-brands fa-google text-2xl text-[var(--accent-2)]"></i><div class="font-semibold text-[var(--fg)]">GCP</div></div><div class="text-xs space-y-1 text-[var(--fg-dim)]"><div>IAM, Cloud KMS</div><div>Security Command Center</div><div>Chronicle, reCAPTCHA</div><div>BeyondCorp, IAP</div><div>Cloud Armor, Binary Auth</div></div></div>
+  </div>
+  <div class="grid grid-cols-4 gap-3 mb-4">
+    <div class="glass p-4"><div class="text-[var(--accent)] font-mono text-xs mb-1">CSPM</div><div class="text-xs text-[var(--fg-dim)]">Cloud Security Posture Management — continuous misconfig detection</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-2)] font-mono text-xs mb-1">CWPP</div><div class="text-xs text-[var(--fg-dim)]">Cloud Workload Protection — runtime for VMs, containers, functions</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-4)] font-mono text-xs mb-1">CNAPP</div><div class="text-xs text-[var(--fg-dim)]">Cloud-Native App Protection — unified CSPM + CWPP + CIEM</div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-5)] font-mono text-xs mb-1">CIEM</div><div class="text-xs text-[var(--fg-dim)]">Cloud Infrastructure Entitlement Mgmt — least privilege</div></div>
+  </div>
+  <div class="glass p-4">
+    <div class="text-[var(--accent-3)] font-mono text-xs mb-2">CLOUD ATTACK VECTORS</div>
+    <div class="grid grid-cols-3 gap-3 text-xs text-[var(--fg)]">
+      <div><span class="text-[var(--accent-3)]">▸</span> Credential theft via leaked IAM keys</div>
+      <div><span class="text-[var(--accent-3)]">▸</span> SSRF → IMDSv1 exploitation (169.254.169.254)</div>
+      <div><span class="text-[var(--accent-3)]">▸</span> Public S3/Blob exposure</div>
+      <div><span class="text-[var(--accent-3)]">▸</span> Over-permissive roles</div>
+      <div><span class="text-[var(--accent-3)]">▸</span> Lateral movement via assumeRole</div>
+      <div><span class="text-[var(--accent-3)]">▸</span> Lambda/function abuse for cryptomining</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 19: MODULE 10 - SUPPLY CHAIN ============ -->
+<section class="slide" data-title="Module 10: Supply Chain Security">
+  <div class="eyebrow mb-3">Module 10 · Software Supply Chain</div>
+  <h2 class="slide-title text-4xl mb-4">Supply Chain <span class="accent-3">Under Siege</span></h2>
+  <div class="grid grid-cols-12 gap-4 flex-1">
+    <div class="col-span-7 glass p-5">
+      <div class="text-sm font-semibold mb-3 flex items-center gap-2 text-[var(--fg)]"><i class="fa-solid fa-link text-[var(--accent-3)]"></i> Software Supply Chain Map</div>
+      <svg viewBox="0 0 580 280" class="w-full">
+        <defs><marker id="arrSc" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#dc2626"/></marker></defs>
+        <g font-family="monospace" font-size="9" text-anchor="middle">
+          <rect x="10" y="120" width="80" height="40" rx="6" fill="#fff" stroke="#0891b2"/><text x="50" y="144" fill="#0891b2">DEVELOPER</text>
+          <rect x="110" y="120" width="80" height="40" rx="6" fill="#fff" stroke="#0891b2"/><text x="150" y="144" fill="#0891b2">BUILD</text>
+          <rect x="110" y="40" width="80" height="40" rx="6" fill="#fff" stroke="#dc2626"/><text x="150" y="64" fill="#dc2626">DEPENDENCIES</text>
+          <rect x="210" y="120" width="80" height="40" rx="6" fill="#fff" stroke="#0891b2"/><text x="250" y="144" fill="#0891b2">PACKAGE</text>
+          <rect x="310" y="120" width="80" height="40" rx="6" fill="#fff" stroke="#d97706"/><text x="350" y="144" fill="#d97706">REGISTRY</text>
+          <rect x="410" y="120" width="80" height="40" rx="6" fill="#fff" stroke="#0891b2"/><text x="450" y="144" fill="#0891b2">DEPLOY</text>
+          <rect x="510" y="120" width="60" height="40" rx="6" fill="#fff" stroke="#059669"/><text x="540" y="144" fill="#059669">CUSTOMER</text>
+          <rect x="20" y="220" width="80" height="40" rx="6" fill="rgba(220,38,38,0.06)" stroke="#dc2626" stroke-dasharray="3,2"/><text x="60" y="237" fill="#dc2626" font-size="8">COMPROMISE</text><text x="60" y="249" fill="#dc2626" font-size="8">DEV ACCOUNT</text>
+          <rect x="120" y="220" width="80" height="40" rx="6" fill="rgba(220,38,38,0.06)" stroke="#dc2626" stroke-dasharray="3,2"/><text x="160" y="237" fill="#dc2626" font-size="8">POISON</text><text x="160" y="249" fill="#dc2626" font-size="8">BUILD</text>
+          <rect x="220" y="220" width="80" height="40" rx="6" fill="rgba(220,38,38,0.06)" stroke="#dc2626" stroke-dasharray="3,2"/><text x="260" y="237" fill="#dc2626" font-size="8">TYPOSQUAT</text><text x="260" y="249" fill="#dc2626" font-size="8">PACKAGE</text>
+          <rect x="320" y="220" width="80" height="40" rx="6" fill="rgba(220,38,38,0.06)" stroke="#dc2626" stroke-dasharray="3,2"/><text x="360" y="237" fill="#dc2626" font-size="8">REGISTRY</text><text x="360" y="249" fill="#dc2626" font-size="8">BREACH</text>
+          <rect x="420" y="220" width="80" height="40" rx="6" fill="rgba(220,38,38,0.06)" stroke="#dc2626" stroke-dasharray="3,2"/><text x="460" y="237" fill="#dc2626" font-size="8">DEPLOY</text><text x="460" y="249" fill="#dc2626" font-size="8">HIJACK</text>
+        </g>
+        <line x1="90" y1="140" x2="110" y2="140" stroke="#0891b2" stroke-width="1.5"/>
+        <line x1="190" y1="140" x2="210" y2="140" stroke="#0891b2" stroke-width="1.5"/>
+        <line x1="290" y1="140" x2="310" y2="140" stroke="#0891b2" stroke-width="1.5"/>
+        <line x1="390" y1="140" x2="410" y2="140" stroke="#0891b2" stroke-width="1.5"/>
+        <line x1="490" y1="140" x2="510" y2="140" stroke="#0891b2" stroke-width="1.5"/>
+        <line x1="150" y1="80" x2="150" y2="120" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#arrSc)"/>
+      </svg>
+    </div>
+    <div class="col-span-5 space-y-3">
+      <div class="glass p-4">
+        <div class="text-[var(--accent-3)] font-mono text-xs mb-2">NOTABLE INCIDENTS</div>
+        <div class="space-y-3">
+          <div class="timeline-item red"><div class="dot"></div><div><div class="time">DEC 2020</div><div class="event text-sm text-[var(--fg)]"><b>SolarWinds</b> — 18,000 customers compromised via SUNBURST backdoor in build pipeline</div></div></div>
+          <div class="timeline-item red"><div class="dot"></div><div><div class="time">DEC 2021</div><div class="event text-sm text-[var(--fg)]"><b>Log4Shell</b> — CVE-2021-44228 in Log4j, RCE in millions of apps</div></div></div>
+          <div class="timeline-item red"><div class="dot"></div><div><div class="time">MAR 2024</div><div class="event text-sm text-[var(--fg)]"><b>XZ Utils</b> — Backdoor planted over 3 years by social-engineered maintainer</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="glass p-4 mt-4">
+    <div class="text-[var(--accent-2)] font-mono text-xs mb-2">DEFENSE FRAMEWORK: SLSA + SIGSTORE</div>
+    <div class="grid grid-cols-4 gap-3 text-xs text-[var(--fg)]">
+      <div><span class="text-[var(--accent-2)] font-semibold">SLSA L1:</span> Build provenance documented</div>
+      <div><span class="text-[var(--accent-2)] font-semibold">SLSA L2:</span> Hosted build platform, signed provenance</div>
+      <div><span class="text-[var(--accent-2)] font-semibold">SLSA L3:</span> Hardened build, isolated, non-falsifiable</div>
+      <div><span class="text-[var(--accent-2)] font-semibold">SLSA L4:</span> Two-party review, hermetic builds</div>
+    </div>
+    <div class="mt-3 flex flex-wrap gap-2">
+      <span class="badge green">SBOM (CycloneDX)</span><span class="badge green">Cosign</span><span class="badge green">Rekor</span><span class="badge green">Fulcio</span><span class="badge green">in-toto</span><span class="badge green">SLSA Provenance</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 20: MODULE 11 - SECURITY AUTOMATION ============ -->
+<section class="slide" data-title="Module 11: Security Automation">
+  <div class="eyebrow mb-3">Module 11 · Automation & AI</div>
+  <h2 class="slide-title text-4xl mb-4">Security <span class="accent">Automation & AI</span></h2>
+  <div class="grid grid-cols-12 gap-4 flex-1">
+    <div class="col-span-7 glass p-5">
+      <div class="text-sm font-semibold mb-3 text-[var(--fg)]">SOAR Workflow: Automated Phishing Response</div>
+      <svg viewBox="0 0 580 320" class="w-full">
+        <defs><marker id="arrAuto" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#059669"/></marker></defs>
+        <g font-family="monospace" font-size="9" text-anchor="middle">
+          <rect x="10" y="20" width="100" height="40" rx="6" fill="#fff" stroke="#dc2626"/><text x="60" y="44" fill="#dc2626">EMAIL RECEIVED</text>
+          <rect x="130" y="20" width="100" height="40" rx="6" fill="#fff" stroke="#d97706"/><text x="180" y="44" fill="#d97706">SIEM DETECT</text>
+          <rect x="250" y="20" width="100" height="40" rx="6" fill="#fff" stroke="#059669"/><text x="300" y="44" fill="#059669">SOAR TRIGGER</text>
+          <rect x="10" y="100" width="120" height="50" rx="6" fill="#fff" stroke="#0891b2"/><text x="70" y="120" fill="#0891b2" font-size="8">ENRICH</text><text x="70" y="135" fill="#475569" font-size="8">VirusTotal</text><text x="70" y="145" fill="#475569" font-size="8">+ WHOIS</text>
+          <rect x="150" y="100" width="120" height="50" rx="6" fill="#fff" stroke="#0891b2"/><text x="210" y="120" fill="#0891b2" font-size="8">QUARANTINE</text><text x="210" y="135" fill="#475569" font-size="8">O365 / Gmail</text><text x="210" y="145" fill="#475569" font-size="8">auto-delete</text>
+          <rect x="290" y="100" width="120" height="50" rx="6" fill="#fff" stroke="#0891b2"/><text x="350" y="120" fill="#0891b2" font-size="8">BLOCK SENDER</text><text x="350" y="135" fill="#475569" font-size="8">firewall + DNS</text>
+          <rect x="430" y="100" width="120" height="50" rx="6" fill="#fff" stroke="#0891b2"/><text x="490" y="120" fill="#0891b2" font-size="8">RESET TOKENS</text><text x="490" y="135" fill="#475569" font-size="8">if user clicked</text>
+          <rect x="100" y="190" width="380" height="50" rx="6" fill="rgba(124,58,237,0.06)" stroke="#7c3aed" stroke-dasharray="4,2"/><text x="290" y="210" fill="#7c3aed">AI / LLM ANALYSIS</text><text x="290" y="225" fill="#475569" font-size="8">classify intent, extract IOCs, suggest remediation</text>
+          <rect x="200" y="270" width="180" height="40" rx="6" fill="#fff" stroke="#059669"/><text x="290" y="294" fill="#059669">TICKET + SLACK NOTIFY</text>
+        </g>
+        <line x1="110" y1="40" x2="130" y2="40" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arrAuto)"/>
+        <line x1="230" y1="40" x2="250" y2="40" stroke="#d97706" stroke-width="1.5" marker-end="url(#arrAuto)"/>
+        <line x1="300" y1="60" x2="300" y2="190" stroke="#059669" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#arrAuto)"/>
+        <line x1="290" y1="240" x2="290" y2="270" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arrAuto)"/>
+      </svg>
+    </div>
+    <div class="col-span-5 space-y-3">
+      <div class="glass p-4">
+        <div class="text-[var(--accent)] font-mono text-xs mb-2">SOAR</div>
+        <div class="text-xs text-[var(--fg-dim)]">Security Orchestration, Automation & Response — coordinates tools, runs playbooks, reduces MTTR from hours to minutes.</div>
+        <div class="mt-2 flex flex-wrap gap-1"><span class="badge">Splunk SOAR</span><span class="badge">Palo Alto XSOAR</span><span class="badge">Tines</span><span class="badge">Shuffle</span></div>
+      </div>
+      <div class="glass p-4">
+        <div class="text-[var(--accent-2)] font-mono text-xs mb-2">AI / LLM SECURITY</div>
+        <div class="text-xs space-y-1 text-[var(--fg-dim)]">
+          <div>• Prompt injection defense</div>
+          <div>• PII redaction in pipelines</div>
+          <div>• Model output validation</div>
+          <div>• LLM-based anomaly detection</div>
+          <div>• Auto-triage of alerts</div>
+        </div>
+      </div>
+      <div class="glass p-4">
+        <div class="text-[var(--accent-4)] font-mono text-xs mb-2">PLAYBOOK EXAMPLES</div>
+        <div class="text-xs space-y-1 text-[var(--fg-dim)]">
+          <div>• Phishing email response</div>
+          <div>• Suspicious login lockdown</div>
+          <div>• Ransomware isolation</div>
+          <div>• Misconfiguration auto-fix</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 21: MODULE 12 - TOOLS ECOSYSTEM ============ -->
+<section class="slide" data-title="Module 12: Tools Ecosystem">
+  <div class="eyebrow mb-3">Module 12 · Ecosystem</div>
+  <h2 class="slide-title text-4xl mb-4">The DevSecOps <span class="accent">Toolchain</span></h2>
+  <div class="grid grid-cols-5 gap-3" style="font-size: 11px;">
+    <div class="tool-card"><div class="tool-name"><i class="fa-brands fa-git-alt text-[var(--accent)]"></i> Git</div><div class="tool-cat">Version Control</div><div class="tool-desc">Distributed VCS. Foundation for code, IaC, policies</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-brands fa-github text-[var(--accent)]"></i> GitHub</div><div class="tool-cat">Platform</div><div class="tool-desc">Actions, Advanced Security, Dependabot, CodeQL</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-brands fa-gitlab text-[var(--accent)]"></i> GitLab</div><div class="tool-cat">Platform</div><div class="tool-desc">All-in-one DevSecOps with native scanning</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-brands fa-jenkins text-[var(--accent)]"></i> Jenkins</div><div class="tool-cat">CI/CD</div><div class="tool-desc">Extensible automation server, plugin-rich</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-cloud-arrow-up text-[var(--accent)]"></i> ArgoCD</div><div class="tool-cat">GitOps</div><div class="tool-desc">Declarative K8s continuous delivery</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-magnifying-glass-chart text-[var(--accent-2)]"></i> SonarQube</div><div class="tool-cat">SAST</div><div class="tool-desc">Code quality + security, 25+ languages</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-code text-[var(--accent-2)]"></i> Semgrep</div><div class="tool-cat">SAST</div><div class="tool-desc">Fast, custom-rule static analysis</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-vial text-[var(--accent-2)]"></i> CodeQL</div><div class="tool-cat">SAST</div><div class="tool-desc">Semantic code analysis by GitHub</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-bug text-[var(--accent-2)]"></i> OWASP ZAP</div><div class="tool-cat">DAST</div><div class="tool-desc">Free web app security scanner</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-spider text-[var(--accent-2)]"></i> Burp Suite</div><div class="tool-cat">DAST</div><div class="tool-desc">Pro web vulnerability scanner</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-link text-[var(--accent-4)]"></i> Snyk</div><div class="tool-cat">SCA</div><div class="tool-desc">Dependency + container + IaC scanning</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-box text-[var(--accent-4)]"></i> Trivy</div><div class="tool-cat">Container</div><div class="tool-desc">Image, FS, repo, IaC scanner</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-shield-virus text-[var(--accent-4)]"></i> Grype</div><div class="tool-cat">Container</div><div class="tool-desc">Vuln scanning for container images</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-key text-[var(--accent-4)]"></i> GitGuardian</div><div class="tool-cat">Secrets</div><div class="tool-desc">Real-time secret detection in repos</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-vault text-[var(--accent-4)]"></i> HashiCorp Vault</div><div class="tool-cat">Secrets</div><div class="tool-desc">Centralized secrets & encryption</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-cloud text-[var(--accent-5)]"></i> Checkov</div><div class="tool-cat">IaC</div><div class="tool-desc">Terraform, K8s, CloudFormation policies</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-file-code text-[var(--accent-5)]"></i> tfsec</div><div class="tool-cat">IaC</div><div class="tool-desc">Terraform security scanner</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-gavel text-[var(--accent-5)]"></i> OPA</div><div class="tool-cat">Policy</div><div class="tool-desc">Policy-as-code for K8s admission</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-shield text-[var(--accent-5)]"></i> Kyverno</div><div class="tool-cat">Policy</div><div class="tool-desc">K8s-native policy engine</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-radar text-[var(--accent-5)]"></i> Falco</div><div class="tool-cat">Runtime</div><div class="tool-desc">K8s runtime security, syscall detection</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-chart-line text-[var(--accent-3)]"></i> Splunk</div><div class="tool-cat">SIEM</div><div class="tool-desc">Log analytics, threat detection</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-bolt text-[var(--accent-3)]"></i> Elastic Security</div><div class="tool-cat">SIEM</div><div class="tool-desc">Open SIEM + EDR</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-robot text-[var(--accent-3)]"></i> Splunk SOAR</div><div class="tool-cat">SOAR</div><div class="tool-desc">Automated playbooks & response</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-shield-halved text-[var(--accent-3)]"></i> Wiz</div><div class="tool-cat">CNAPP</div><div class="tool-desc">Cloud-native protection platform</div></div>
+    <div class="tool-card"><div class="tool-name"><i class="fa-solid fa-signature text-[var(--accent-3)]"></i> Sigstore/Cosign</div><div class="tool-cat">Signing</div><div class="tool-desc">Artifact signing & transparency log</div></div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 22: MODULE 13 - CASE STUDIES ============ -->
+<section class="slide" data-title="Module 13: Case Studies">
+  <div class="eyebrow mb-3">Module 13 · Lessons Learned</div>
+  <h2 class="slide-title text-4xl mb-4">Breach <span class="accent-3">Case Studies</span></h2>
+  <div class="grid grid-cols-3 gap-3 mb-3">
+    <div class="glass-strong p-4 cursor-pointer hover:border-[var(--accent-3)] transition" style="border-color: var(--accent-3);" onclick="showCaseStudy('solarwinds')"><div class="flex items-center justify-between mb-2"><div class="font-semibold text-[var(--fg)]">SolarWinds</div><span class="badge red">2020</span></div><div class="text-xs text-[var(--fg-dim)]">SUNBURST backdoor injected via compromised build server. 18,000 customers including US gov affected.</div></div>
+    <div class="glass-strong p-4 cursor-pointer hover:border-[var(--accent-3)] transition" style="border-color: var(--accent-3);" onclick="showCaseStudy('capitalone')"><div class="flex items-center justify-between mb-2"><div class="font-semibold text-[var(--fg)]">Capital One</div><span class="badge red">2019</span></div><div class="text-xs text-[var(--fg-dim)]">SSRF + over-permissive IAM = 106M records exposed. Former AWS employee exploited misconfigured WAF.</div></div>
+    <div class="glass-strong p-4 cursor-pointer hover:border-[var(--accent-3)] transition" style="border-color: var(--accent-3);" onclick="showCaseStudy('equifax')"><div class="flex items-center justify-between mb-2"><div class="font-semibold text-[var(--fg)]">Equifax</div><span class="badge red">2017</span></div><div class="text-xs text-[var(--fg-dim)]">Unpatched Apache Struts CVE-2017-5638. 147M records, $1.4B losses. Failed vulnerability scanning.</div></div>
+    <div class="glass-strong p-4 cursor-pointer hover:border-[var(--accent-3)] transition" style="border-color: var(--accent-3);" onclick="showCaseStudy('codecov')"><div class="flex items-center justify-between mb-2"><div class="font-semibold text-[var(--fg)]">Codecov</div><span class="badge red">2021</span></div><div class="text-xs text-[var(--fg-dim)]">Bash uploader script modified for 2 months. Leaked CI tokens from thousands of customers.</div></div>
+    <div class="glass-strong p-4 cursor-pointer hover:border-[var(--accent-3)] transition" style="border-color: var(--accent-3);" onclick="showCaseStudy('uber')"><div class="flex items-center justify-between mb-2"><div class="font-semibold text-[var(--fg)]">Uber</div><span class="badge red">2022</span></div><div class="text-xs text-[var(--fg-dim)]">MFA fatigue attack on contractor → AWS access → 57M records. Hardcoded PowerShell script found.</div></div>
+    <div class="glass-strong p-4 cursor-pointer hover:border-[var(--accent-3)] transition" style="border-color: var(--accent-3);" onclick="showCaseStudy('okta')"><div class="flex items-center justify-between mb-2"><div class="font-semibold text-[var(--fg)]">Okta / Lapsus$</div><span class="badge red">2022</span></div><div class="text-xs text-[var(--fg-dim)]">Subcontractor (Sitel) compromised via social engineering. Access to Okta admin console exposed.</div></div>
+  </div>
+  <div class="glass p-4" id="caseDetail">
+    <div class="text-[var(--accent)] font-mono text-xs mb-2">SELECTED CASE: SOLARWINDS</div>
+    <div class="grid grid-cols-2 gap-4 text-xs text-[var(--fg)]">
+      <div><div class="text-[var(--fg-dim)] mb-1">TIMELINE</div><div class="space-y-1 text-[var(--fg-dim)]"><div>• Sep 2019 — Attacker infiltrates build env</div><div>• Feb 2020 — Trojaned update shipped</div><div>• Dec 2020 — FireEye discloses breach</div></div></div>
+      <div><div class="text-[var(--fg-dim)] mb-1">ROOT CAUSE</div><div class="text-[var(--fg-dim)]">Compromised build server, no provenance verification, weak code-signing process.</div></div>
+      <div><div class="text-[var(--fg-dim)] mb-1">DEVSECOPS MITIGATION</div><div class="text-[var(--fg-dim)]">Reproducible builds, SLSA L3+ provenance, SBOM, Sigstore signing, network segmentation.</div></div>
+      <div><div class="text-[var(--fg-dim)] mb-1">LESSON</div><div class="text-[var(--fg-dim)]">Trust in your build pipeline is trust in your product.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 23: MODULE 14 - BEST PRACTICES & MATURITY ============ -->
+<section class="slide" data-title="Module 14: Best Practices & Maturity">
+  <div class="eyebrow mb-3">Module 14 · Best Practices</div>
+  <h2 class="slide-title text-4xl mb-4">DevSecOps <span class="accent">Maturity Model</span></h2>
+  <div class="glass p-5 mb-4">
+    <svg viewBox="0 0 1100 200" class="w-full">
+      <defs>
+        <linearGradient id="matGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#dc2626"/>
+          <stop offset="33%" stop-color="#d97706"/>
+          <stop offset="66%" stop-color="#0891b2"/>
+          <stop offset="100%" stop-color="#059669"/>
+        </linearGradient>
+      </defs>
+      <rect x="20" y="70" width="1060" height="40" rx="20" fill="rgba(15,23,42,0.04)" stroke="url(#matGrad)" stroke-width="2"/>
+      <g font-family="monospace" font-size="11" text-anchor="middle">
+        <g><circle cx="150" cy="90" r="32" fill="#fff" stroke="#dc2626" stroke-width="2"/><text x="150" y="88" fill="#dc2626">L1</text><text x="150" y="102" fill="#475569" font-size="8">MANUAL</text><text x="150" y="150" fill="#dc2626">Reactive</text><text x="150" y="165" fill="#475569" font-size="9">Ad-hoc scanning</text></g>
+        <g><circle cx="430" cy="90" r="32" fill="#fff" stroke="#d97706" stroke-width="2"/><text x="430" y="88" fill="#d97706">L2</text><text x="430" y="102" fill="#475569" font-size="8">DEFINED</text><text x="430" y="150" fill="#d97706">Repeatable</text><text x="430" y="165" fill="#475569" font-size="9">CI security gates</text></g>
+        <g><circle cx="710" cy="90" r="32" fill="#fff" stroke="#0891b2" stroke-width="2"/><text x="710" y="88" fill="#0891b2">L3</text><text x="710" y="102" fill="#475569" font-size="8">MANAGED</text><text x="710" y="150" fill="#0891b2">Automated</text><text x="710" y="165" fill="#475569" font-size="9">Full pipeline sec</text></g>
+        <g><circle cx="990" cy="90" r="32" fill="#fff" stroke="#059669" stroke-width="2"/><text x="990" y="88" fill="#059669">L4</text><text x="990" y="102" fill="#475569" font-size="8">OPTIMIZED</text><text x="990" y="150" fill="#059669">Continuous</text><text x="990" y="165" fill="#475569" font-size="9">Self-healing</text></g>
+      </g>
+      <g><circle cx="710" cy="90" r="6" fill="#0891b2"/><text x="710" y="50" text-anchor="middle" fill="#0891b2" font-family="monospace" font-size="10">YOU ARE HERE</text></g>
+    </svg>
+  </div>
+  <div class="grid grid-cols-3 gap-3">
+    <div class="glass p-4"><div class="text-[var(--accent)] font-mono text-xs mb-2">CULTURE</div><div class="text-xs space-y-1 text-[var(--fg-dim)]"><div>✓ Security champions program</div><div>✓ Blameless post-mortems</div><div>✓ Threat modeling in design</div><div>✓ Security training for devs</div></div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-2)] font-mono text-xs mb-2">AUTOMATION</div><div class="text-xs space-y-1 text-[var(--fg-dim)]"><div>✓ Pre-commit hooks</div><div>✓ Pipeline security gates</div><div>✓ Auto-remediation of issues</div><div>✓ Continuous compliance</div></div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-4)] font-mono text-xs mb-2">MEASUREMENT</div><div class="text-xs space-y-1 text-[var(--fg-dim)]"><div>✓ MTTR for vulns</div><div>✓ Mean time to remediate</div><div>✓ Defect density</div><div>✓ Coverage metrics</div></div></div>
+  </div>
+  <div class="glass p-4 mt-3">
+    <div class="text-[var(--accent-5)] font-mono text-xs mb-2">SECURITY METRICS THAT MATTER</div>
+    <div class="grid grid-cols-6 gap-3 text-center text-xs">
+      <div><div class="text-[var(--accent)] font-mono text-lg">≤24h</div><div class="text-[var(--fg-dim)] text-[10px]">Critical fix SLA</div></div>
+      <div><div class="text-[var(--accent-2)] font-mono text-lg">≥95%</div><div class="text-[var(--fg-dim)] text-[10px]">SAST coverage</div></div>
+      <div><div class="text-[var(--accent-4)] font-mono text-lg">≤7d</div><div class="text-[var(--fg-dim)] text-[10px]">High vuln remediate</div></div>
+      <div><div class="text-[var(--accent-3)] font-mono text-lg">0</div><div class="text-[var(--fg-dim)] text-[10px]">Criticals in prod</div></div>
+      <div><div class="text-[var(--accent-5)] font-mono text-lg">100%</div><div class="text-[var(--fg-dim)] text-[10px]">SBOM coverage</div></div>
+      <div><div class="text-[var(--accent)] font-mono text-lg">≤30m</div><div class="text-[var(--fg-dim)] text-[10px]">Detection MTTR</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 24: QUIZ 1 ============ -->
+<section class="slide" data-title="Quiz 1">
+  <div class="eyebrow mb-3">Module 15 · Interactive Quiz</div>
+  <h2 class="slide-title text-4xl mb-4">Knowledge Check <span class="accent-4">01/05</span></h2>
+  <div class="glass-strong p-6">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-xl bg-[rgba(217,119,6,0.1)] grid place-items-center text-[var(--accent-4)]"><i class="fa-solid fa-question"></i></div>
+      <div>
+        <div class="font-mono text-xs text-[var(--accent-4)]">QUESTION 1 of 5</div>
+        <div class="text-lg font-semibold mt-1 text-[var(--fg)]">Which security practice is the best example of "Shift Left"?</div>
+      </div>
+    </div>
+    <div class="space-y-2">
+      <div class="quiz-option" data-correct="false" onclick="checkAnswer(this)"><div class="opt-letter">A</div><div class="opt-text">Running DAST against the production environment after deployment</div></div>
+      <div class="quiz-option" data-correct="false" onclick="checkAnswer(this)"><div class="opt-letter">B</div><div class="opt-text">Configuring WAF rules in response to an ongoing attack</div></div>
+      <div class="quiz-option" data-correct="true" onclick="checkAnswer(this)"><div class="opt-letter">C</div><div class="opt-text">Running SAST and secret scanning in the developer IDE before commit</div></div>
+      <div class="quiz-option" data-correct="false" onclick="checkAnswer(this)"><div class="opt-letter">D</div><div class="opt-text">Investigating alerts detected by runtime container security</div></div>
+    </div>
+    <div id="quizFeedback" class="mt-4 text-sm hidden"></div>
+  </div>
+  <div class="mt-3 flex items-center justify-between text-xs text-[var(--fg-dim)] font-mono">
+    <span>Score: <span id="quizScore" class="text-[var(--accent)]">0</span> / 5</span>
+    <span>Press 1-4 to select an answer</span>
+  </div>
+</section>
+
+<!-- ============ SLIDE 25: QUIZ 2 ============ -->
+<section class="slide" data-title="Quiz 2">
+  <div class="eyebrow mb-3">Module 15 · Interactive Quiz</div>
+  <h2 class="slide-title text-4xl mb-4">Knowledge Check <span class="accent-4">02/05</span></h2>
+  <div class="glass-strong p-6">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-xl bg-[rgba(217,119,6,0.1)] grid place-items-center text-[var(--accent-4)]"><i class="fa-solid fa-question"></i></div>
+      <div>
+        <div class="font-mono text-xs text-[var(--accent-4)]">QUESTION 2 of 5</div>
+        <div class="text-lg font-semibold mt-1 text-[var(--fg)]">The SolarWinds attack primarily exploited which stage of the SDLC?</div>
+      </div>
+    </div>
+    <div class="space-y-2">
+      <div class="quiz-option" data-correct="false" onclick="checkAnswer(this)"><div class="opt-letter">A</div><div class="opt-text">Source code commit by an external attacker</div></div>
+      <div class="quiz-option" data-correct="true" onclick="checkAnswer(this)"><div class="opt-letter">B</div><div class="opt-text">Build pipeline compromise (SUNBURST injection)</div></div>
+      <div class="quiz-option" data-correct="false" onclick="checkAnswer(this)"><div class="opt-letter">C</div><div class="opt-text">Runtime container escape in production</div></div>
+      <div class="quiz-option" data-correct="false" onclick="checkAnswer(this)"><div class="opt-letter">D</div><div class="opt-text">Misconfigured cloud storage bucket</div></div>
+    </div>
+    <div id="quizFeedback2" class="mt-4 text-sm hidden"></div>
+  </div>
+  <div class="mt-3 flex items-center justify-between text-xs text-[var(--fg-dim)] font-mono">
+    <span>Score: <span class="text-[var(--accent)]">0</span> / 5</span>
+    <span>Press 1-4 to select an answer</span>
+  </div>
+</section>
+
+<!-- ============ SLIDE 26: QUIZ 3 ============ -->
+<section class="slide" data-title="Quiz 3">
+  <div class="eyebrow mb-3">Module 15 · Interactive Quiz</div>
+  <h2 class="slide-title text-4xl mb-4">Knowledge Check <span class="accent-4">03/05</span></h2>
+  <div class="glass-strong p-6">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-xl bg-[rgba(217,119,6,0.1)] grid place-items-center text-[var(--accent-4)]"><i class="fa-solid fa-question"></i></div>
+      <div>
+        <div class="font-mono text-xs text-[var(--accent-4)]">QUESTION 3 of 5</div>
+        <div class="text-lg font-semibold mt-1 text-[var(--fg)]">Which tool category is BEST suited for detecting hardcoded AWS access keys in a Git repository?</div>
+      </div>
+    </div>
+    <div class="space-y-2">
+      <div class="quiz-option" data-correct="false" onclick="checkAnswer(this)"><div class="opt-letter">A</div><div class="opt-text">DAST scanner (e.g., OWASP ZAP)</div></div>
+      <div class="quiz-option" data-correct="false" onclick="checkAnswer(this)"><div class="opt-letter">B</div><div class="opt-text">Container image scanner (e.g., Trivy)</div></div>
+      <div class="quiz-option" data-correct="true" onclick="checkAnswer(this)"><div class="opt-letter">C</div><div class="opt-text">Secret scanner (e.g., GitGuardian, Gitleaks)</div></div>
+      <div class="quiz-option" data-correct="false" onclick="checkAnswer(this)"><div class="opt-letter">D</div><div class="opt-text">Network policy enforcer (e.g., Calico)</div></div>
+    </div>
+    <div id="quizFeedback3" class="mt-4 text-sm hidden"></div>
+  </div>
+  <div class="mt-3 flex items-center justify-between text-xs text-[var(--fg-dim)] font-mono">
+    <span>Score: <span class="text-[var(--accent)]">0</span> / 5</span>
+    <span>Press 1-4 to select an answer</span>
+  </div>
+</section>
+
+<!-- ============ SLIDE 27: QUIZ 4 ============ -->
+<section class="slide" data-title="Quiz 4">
+  <div class="eyebrow mb-3">Module 15 · Interactive Quiz</div>
+  <h2 class="slide-title text-4xl mb-4">Knowledge Check <span class="accent-4">04/05</span></h2>
+  <div class="glass-strong p-6">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-xl bg-[rgba(217,119,6,0.1)] grid place-items-center text-[var(--accent-4)]"><i class="fa-solid fa-question"></i></div>
+      <div>
+        <div class="font-mono text-xs text-[var(--accent-4)]">QUESTION 4 of 5</div>
+        <div class="text-lg font-semibold mt-1 text-[var(--fg)]">In Kubernetes, what is the MOST effective control to prevent a pod from accessing the host's Docker socket?</div>
+      </div>
+    </div>
+    <div class="space-y-2">
+      <div class="quiz-option" data-correct="false" onclick="checkAnswer(this)"><div class="opt-letter">A</div><div class="opt-text">Enabling kube-bench scans on the node</div></div>
+      <div class="quiz-option" data-correct="true" onclick="checkAnswer(this)"><div class="opt-letter">B</div><div class="opt-text">Pod Security Standards (restricted) + admission controller</div></div>
+      <div class="quiz-option" data-correct="false" onclick="checkAnswer(this)"><div class="opt-letter">C</div><div class="opt-text">Installing Falco for runtime detection</div></div>
+      <div class="quiz-option" data-correct="false" onclick="checkAnswer(this)"><div class="opt-letter">D</div><div class="opt-text">Using a NetworkPolicy to block egress traffic</div></div>
+    </div>
+    <div id="quizFeedback4" class="mt-4 text-sm hidden"></div>
+  </div>
+  <div class="mt-3 flex items-center justify-between text-xs text-[var(--fg-dim)] font-mono">
+    <span>Score: <span class="text-[var(--accent)]">0</span> / 5</span>
+    <span>Press 1-4 to select an answer</span>
+  </div>
+</section>
+
+<!-- ============ SLIDE 28: QUIZ 5 ============ -->
+<section class="slide" data-title="Quiz 5">
+  <div class="eyebrow mb-3">Module 15 · Interactive Quiz</div>
+  <h2 class="slide-title text-4xl mb-4">Knowledge Check <span class="accent-4">05/05</span></h2>
+  <div class="glass-strong p-6">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-xl bg-[rgba(217,119,6,0.1)] grid place-items-center text-[var(--accent-4)]"><i class="fa-solid fa-question"></i></div>
+      <div>
+        <div class="font-mono text-xs text-[var(--accent-4)]">QUESTION 5 of 5</div>
+        <div class="text-lg font-semibold mt-1 text-[var(--fg)]">Which framework provides a graduated levels-based approach to securing software supply chain integrity?</div>
+      </div>
+    </div>
+    <div class="space-y-2">
+      <div class="quiz-option" data-correct="false" onclick="checkAnswer(this)"><div class="opt-letter">A</div><div class="opt-text">MITRE ATT&CK</div></div>
+      <div class="quiz-option" data-correct="false" onclick="checkAnswer(this)"><div class="opt-letter">B</div><div class="opt-text">OWASP Top 10</div></div>
+      <div class="quiz-option" data-correct="true" onclick="checkAnswer(this)"><div class="opt-letter">C</div><div class="opt-text">SLSA (Supply-chain Levels for Software Artifacts)</div></div>
+      <div class="quiz-option" data-correct="false" onclick="checkAnswer(this)"><div class="opt-letter">D</div><div class="opt-text">NIST CSF 2.0</div></div>
+    </div>
+    <div id="quizFeedback5" class="mt-4 text-sm hidden"></div>
+  </div>
+  <div class="mt-3 flex items-center justify-between text-xs text-[var(--fg-dim)] font-mono">
+    <span>Final Score: <span class="text-[var(--accent)]">0</span> / 5</span>
+    <span>Press 1-4 to select an answer</span>
+  </div>
+</section>
+
+<!-- ============ SLIDE 29: CODE - GITHUB ACTIONS SECURE PIPELINE ============ -->
+<section class="slide" data-title="Code: Secure GitHub Actions">
+  <div class="eyebrow mb-3">Code Example · GitHub Actions</div>
+  <h2 class="slide-title text-4xl mb-4">Secure <span class="accent">CI/CD Pipeline</span></h2>
+  <div class="grid grid-cols-12 gap-4 flex-1">
+    <div class="col-span-8">
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <div>.github/workflows/secure-ci.yml</div>
+          <div class="text-[var(--accent-2)]">SECURE</div>
+        </div>
+<pre><code class="language-yaml">name: Secure CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Least-privilege permissions — no wildcard
+permissions:
+  contents: read
+  security-events: write
+  id-token: write   # OIDC for keyless auth
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # full history for secret scan
+
+      # 1. Secret scanning
+      - name: Scan for secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 2. SAST with CodeQL
+      - name: CodeQL Analysis
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript, python
+          queries: security-extended
+
+      - run: npm ci && npm run build
+      - uses: github/codeql-action/analyze@v3
+
+      # 3. SCA — dependency review on PRs
+      - name: Dependency Review
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+
+      # 4. Container build + scan
+      - name: Build & Scan Image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: app:${{ github.sha }}
+          format: sarif
+          exit-code: 1
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+
+      # 5. Generate SBOM
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          artifact-name: sbom.spdx.json
+
+      # 6. Sign with Cosign (keyless via OIDC)
+      - name: Sign image
+        uses: sigstore/cosign-installer@v3
+      - run: cosign sign --yes app:${{ github.sha }}</code></pre>
+      </div>
+    </div>
+    <div class="col-span-4 space-y-3">
+      <div class="glass p-4">
+        <div class="text-[var(--accent-2)] font-mono text-xs mb-2">SECURE PATTERNS</div>
+        <div class="text-xs space-y-1 text-[var(--fg-dim)]">
+          <div>✓ Explicit permissions (no <code class="text-[var(--accent-3)]">write-all</code>)</div>
+          <div>✓ OIDC keyless authentication</div>
+          <div>✓ Fail-on-severity thresholds</div>
+          <div>✓ SBOM generation per build</div>
+          <div>✓ Cosign artifact signing</div>
+          <div>✓ SARIF upload to GitHub Security</div>
+        </div>
+      </div>
+      <div class="glass p-4">
+        <div class="text-[var(--accent-3)] font-mono text-xs mb-2">COMMON PITFALLS</div>
+        <div class="text-xs space-y-1 text-[var(--fg-dim)]">
+          <div>✗ Using <code>${{ secrets.GITHUB_TOKEN }}</code> in scripts (injection)</div>
+          <div>✗ <code>pull_request_target</code> on untrusted PRs</div>
+          <div>✗ Self-hosted runners without isolation</div>
+          <div>✗ No timeout-minutes (DoS)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 30: DOCKERFILE SECURE vs INSECURE ============ -->
+<section class="slide" data-title="Code: Dockerfile Security">
+  <div class="eyebrow mb-3">Code Example · Dockerfile</div>
+  <h2 class="slide-title text-4xl mb-4">Dockerfile: <span class="accent-3">Insecure</span> vs <span class="accent-2">Secure</span></h2>
+  <div class="grid grid-cols-2 gap-4 flex-1">
+    <div>
+      <div class="flex items-center gap-2 mb-3"><span class="badge red"><i class="fa-solid fa-xmark"></i> INSECURE</span></div>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <div>Dockerfile.bad</div>
+        </div>
+<pre><code class="language-docker">FROM ubuntu:latest
+
+# Running as root
+RUN apt-get update && apt-get install -y \
+    python3 python3-pip curl
+
+# Secret baked into image
+ENV AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+ENV AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG
+
+# Copy entire source with secrets
+COPY . /app
+WORKDIR /app
+
+# Expose everything
+EXPOSE 8080
+
+# Latest tag, no health, no labels
+CMD ["python3", "app.py"]</code></pre>
+      </div>
+      <div class="mt-3 space-y-1 text-xs text-[var(--accent-3)]">
+        <div>✗ Runs as root</div>
+        <div>✗ Hardcoded AWS credentials</div>
+        <div>✗ <code>:latest</code> tag (non-reproducible)</div>
+        <div>✗ No image label / SBOM</div>
+        <div>✗ Full source copied (incl .git)</div>
+      </div>
+    </div>
+    <div>
+      <div class="flex items-center gap-2 mb-3"><span class="badge green"><i class="fa-solid fa-check"></i> SECURE</span></div>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <div>Dockerfile.secure</div>
+        </div>
+<pre><code class="language-docker"># Pin digest for reproducibility
+FROM python:3.12-slim@sha256:abc123... AS builder
+
+# Non-root user from start
+RUN groupadd -r app && useradd -r -g app app
+
+# Install as root, switch later
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Multi-stage: only copy what's needed
+FROM python:3.12-slim@sha256:abc123...
+RUN groupadd -r app && useradd -r -g app app
+COPY --from=builder /usr/local/lib/python3.12 \
+                  /usr/local/lib/python3.12
+COPY --chown=app:app app/ /app/
+WORKDIR /app
+
+# Drop privileges
+USER app
+
+# Read-only filesystem
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD curl -f http://localhost:8080/health || exit 1
+
+# OCI labels for provenance
+LABEL org.opencontainers.image.source="https://github.com/org/app"
+LABEL org.opencontainers.image.revision="${GIT_SHA}"
+
+EXPOSE 8080
+CMD ["python3", "app.py"]</code></pre>
+      </div>
+      <div class="mt-3 space-y-1 text-xs text-[var(--accent-2)]">
+        <div>✓ Pinned image digest</div>
+        <div>✓ Non-root USER</div>
+        <div>✓ Multi-stage build (smaller surface)</div>
+        <div>✓ HEALTHCHECK defined</div>
+        <div>✓ OCI labels for traceability</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 31: REFERENCES ============ -->
+<section class="slide" data-title="References & Standards">
+  <div class="eyebrow mb-3">References & Standards</div>
+  <h2 class="slide-title text-4xl mb-5">Authoritative <span class="accent">Sources</span></h2>
+  <div class="grid grid-cols-4 gap-3">
+    <div class="glass p-4"><div class="text-[var(--accent)] font-mono text-xs mb-2">NIST</div><div class="text-xs space-y-1 text-[var(--fg-dim)]"><div>• SP 800-218 SSDF</div><div>• SP 800-204D Zero Trust</div><div>• SP 800-190 Container Sec</div><div>• NIST CSF 2.0</div><div>• NVD CVE database</div></div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-2)] font-mono text-xs mb-2">OWASP</div><div class="text-xs space-y-1 text-[var(--fg-dim)]"><div>• Top 10 (2021)</div><div>• ASVS, MASVS</div><div>• Threat Dragon</div><div>• OWASP SAMM</div><div>• Cheat Sheet Series</div></div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-4)] font-mono text-xs mb-2">MITRE</div><div class="text-xs space-y-1 text-[var(--fg-dim)]"><div>• ATT&CK Framework</div><div>• D3FEND</div><div>• ENGAGE</div><div>• CWE / CAPEC</div><div>• CALDERA / ATT&CK Eval</div></div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-5)] font-mono text-xs mb-2">CNCF</div><div class="text-xs space-y-1 text-[var(--fg-dim)]"><div>• Cloud Native Security WPs</div><div>• CIS Kubernetes Benchmark</div><div>• Cloud Controls Matrix</div><div>• Software Supply Chain BP</div></div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-3)] font-mono text-xs mb-2">SLSA / SIGSTORE</div><div class="text-xs space-y-1 text-[var(--fg-dim)]"><div>• SLSA Framework (L1-L4)</div><div>• Sigstore (Cosign, Rekor, Fulcio)</div><div>• in-toto specification</div><div>• CycloneDX / SPDX SBOM</div></div></div>
+    <div class="glass p-4"><div class="text-[var(--accent)] font-mono text-xs mb-2">CISA</div><div class="text-xs space-y-1 text-[var(--fg-dim)]"><div>• Secure by Design</div><div>• KEV Catalog</div><div>• Cyber Hygiene</div><div>• SBOM minimum elements</div></div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-2)] font-mono text-xs mb-2">CLOUD</div><div class="text-xs space-y-1 text-[var(--fg-dim)]"><div>• AWS Security Best Practices</div><div>• Azure Security Benchmark</div><div>• GCP Security Foundations</div><div>• Shared Responsibility Model</div></div></div>
+    <div class="glass p-4"><div class="text-[var(--accent-4)] font-mono text-xs mb-2">VENDOR</div><div class="text-xs space-y-1 text-[var(--fg-dim)]"><div>• Docker Security</div><div>• Kubernetes SIG Security</div><div>• GitHub Security Lab</div><div>• GitLab Security Reports</div><div>• Microsoft SDL</div></div></div>
+  </div>
+  <div class="glass p-4 mt-4 flex items-center justify-between">
+    <div class="text-xs text-[var(--fg-dim)]">All references and standards are publicly accessible.</div>
+    <div class="flex gap-2">
+      <span class="badge">NIST</span><span class="badge green">OWASP</span><span class="badge amber">MITRE</span><span class="badge violet">CNCF</span><span class="badge red">CISA</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 32: THANK YOU ============ -->
+<section class="slide" data-title="Thank You">
+  <div class="hero-bg">
+    <div class="hero-orb o1" style="background: var(--accent-2);"></div>
+    <div class="hero-orb o2"></div>
+    <div class="hero-orb o3"></div>
+  </div>
+  <div class="relative z-10 flex flex-col h-full justify-center items-center text-center">
+    <div class="eyebrow mb-5">End of Keynote</div>
+    <h1 class="hero-title" style="font-size: clamp(48px, 7vw, 100px);">
+      <span class="block">Security is not a</span>
+      <span class="block gradient">feature.</span>
+      <span class="block">It's a culture.</span>
+    </h1>
+    <p class="mt-8 text-lg text-[var(--fg-dim)] max-w-2xl leading-relaxed">
+      DevSecOps isn't a tool you buy. It's a discipline you practice — every commit, every build, every release.
+    </p>
+    <div class="mt-10 flex flex-wrap gap-3 justify-center">
+      <span class="badge"><i class="fa-solid fa-shield-halved"></i> Shift Left</span>
+      <span class="badge green"><i class="fa-solid fa-radar"></i> Shift Right</span>
+      <span class="badge amber"><i class="fa-solid fa-infinity"></i> Continuous</span>
+      <span class="badge violet"><i class="fa-solid fa-users"></i> Shared Ownership</span>
+    </div>
+    <div class="mt-12 grid grid-cols-3 gap-8 text-sm">
+      <div class="text-center">
+        <div class="text-[var(--accent)] font-mono text-xs mb-1">QUESTIONS</div>
+        <div class="text-[var(--fg-dim)]">Open the floor</div>
+      </div>
+      <div class="text-center">
+        <div class="text-[var(--accent-2)] font-mono text-xs mb-1">RESOURCES</div>
+        <div class="text-[var(--fg-dim)]">Press R for references</div>
+      </div>
+      <div class="text-center">
+        <div class="text-[var(--accent-4)] font-mono text-xs mb-1">GLOSSARY</div>
+        <div class="text-[var(--fg-dim)]">Press G for terms</div>
+      </div>
+    </div>
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 text-xs text-[var(--fg-mute)] font-mono">
+      <i class="fa-solid fa-arrow-left mr-2 text-[var(--accent)]"></i>Press ← to revisit any slide · F for fullscreen
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <div class="nav-group">
+    <button class="nav-btn" id="homeBtn"><i class="fa-solid fa-house"></i> Home</button>
+    <button class="nav-btn" id="prevBtn"><i class="fa-solid fa-arrow-left"></i> Prev</button>
+  </div>
+  <div class="dots" id="dots"></div>
+  <div class="nav-group">
+    <span class="slide-counter"><span class="current" id="currentSlide">1</span> / <span id="totalSlides">32</span></span>
+    <button class="nav-btn primary" id="nextBtn">Next <i class="fa-solid fa-arrow-right"></i></button>
+  </div>
+</nav>
+
+<!-- Speaker Notes Panel -->
+<aside class="notes-panel" id="notesPanel">
+  <div class="flex items-center justify-between mb-4">
+    <div class="font-mono text-xs text-[var(--accent)]">SPEAKER NOTES</div>
+    <button class="tool-btn" onclick="toggleNotes()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div id="notesContent" class="text-sm text-[var(--fg-dim)] leading-relaxed"></div>
+  <button class="nav-btn primary mt-4 w-full" onclick="downloadNotes()"><i class="fa-solid fa-download"></i> Download Notes</button>
+</aside>
+
+<!-- Search Modal -->
+<div class="modal-overlay" id="searchModal">
+  <div class="modal-content">
+    <div class="flex items-center gap-3 mb-4">
+      <i class="fa-solid fa-magnifying-glass text-[var(--accent)]"></i>
+      <input type="text" class="search-input" id="searchInput" placeholder="Search slides..." style="padding-left: 16px;">
+      <button class="tool-btn" onclick="closeModal('searchModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="searchResults" class="space-y-2 max-h-96 overflow-y-auto"></div>
+  </div>
+</div>
+
+<!-- Glossary Modal -->
+<div class="modal-overlay" id="glossaryModal">
+  <div class="modal-content">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <div class="eyebrow mb-1">Quick Reference</div>
+        <h3 class="font-bold text-xl text-[var(--fg)]" style="font-family: 'Space Grotesk';">Glossary</h3>
+      </div>
+      <button class="tool-btn" onclick="closeModal('glossaryModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="grid grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto" id="glossaryContent"></div>
+  </div>
+</div>
+
+<!-- References Modal -->
+<div class="modal-overlay" id="refsModal">
+  <div class="modal-content">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <div class="eyebrow mb-1">Sources & Standards</div>
+        <h3 class="font-bold text-xl text-[var(--fg)]" style="font-family: 'Space Grotesk';">References</h3>
+      </div>
+      <button class="tool-btn" onclick="closeModal('refsModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="space-y-3 max-h-[60vh] overflow-y-auto text-sm text-[var(--fg-dim)]">
+      <div><b class="text-[var(--accent)]">NIST SP 800-218</b> — Secure Software Development Framework (SSDF)</div>
+      <div><b class="text-[var(--accent)]">NIST SP 800-204D</b> — Zero Trust Architecture</div>
+      <div><b class="text-[var(--accent)]">NIST SP 800-190</b> — Application Container Security Guide</div>
+      <div><b class="text-[var(--accent)]">NIST CSF 2.0</b> — Cybersecurity Framework</div>
+      <div><b class="text-[var(--accent-2)]">OWASP Top 10 (2021)</b> — Web Application Security Risks</div>
+      <div><b class="text-[var(--accent-2)]">OWASP SAMM</b> — Software Assurance Maturity Model</div>
+      <div><b class="text-[var(--accent-2)]">OWASP ASVS / MASVS</b> — Application / Mobile Security Verification</div>
+      <div><b class="text-[var(--accent-4)]">MITRE ATT&CK</b> — Adversarial Tactics, Techniques & Procedures</div>
+      <div><b class="text-[var(--accent-4)]">MITRE D3FEND</b> — Defensive Countermeasures</div>
+      <div><b class="text-[var(--accent-4)]">CWE / CAPEC</b> — Common Weaknesses / Attack Patterns</div>
+      <div><b class="text-[var(--accent-5)]">CNCF</b> — Cloud Native Computing Foundation Security Whitepapers</div>
+      <div><b class="text-[var(--accent-5)]">CIS Kubernetes Benchmark</b> — Center for Internet Security</div>
+      <div><b class="text-[var(--accent-5)]">CIS Docker Benchmark</b> — Docker Hardening</div>
+      <div><b class="text-[var(--accent-3)]">SLSA Framework</b> — Supply-chain Levels for Software Artifacts</div>
+      <div><b class="text-[var(--accent-3)]">Sigstore</b> — Cosign, Rekor, Fulcio</div>
+      <div><b class="text-[var(--accent-3)]">in-toto</b> — Software Supply Chain Integrity Framework</div>
+      <div><b class="text-[var(--accent-3)]">CycloneDX / SPDX</b> — SBOM Standards</div>
+      <div><b class="text-[var(--accent)]">CISA Secure by Design</b> — Cybersecurity & Infrastructure Security Agency</div>
+      <div><b class="text-[var(--accent)]">CISA KEV Catalog</b> — Known Exploited Vulnerabilities</div>
+      <div><b class="text-[var(--accent-2)]">AWS / Azure / GCP</b> — Shared Responsibility Model + Security Best Practices</div>
+      <div><b class="text-[var(--accent-4)]">Microsoft SDL</b> — Security Development Lifecycle</div>
+      <div><b class="text-[var(--accent-4)]">Docker / Kubernetes</b> — Vendor Security Documentation</div>
+      <div><b class="text-[var(--accent-5)]">GitHub Security Lab / GitLab</b> — Vendor Security Reports</div>
+    </div>
+  </div>
+</div>
+
+<!-- Help Modal -->
+<div class="modal-overlay" id="helpModal">
+  <div class="modal-content" style="max-width: 600px;">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <div class="eyebrow mb-1">Keyboard Shortcuts</div>
+        <h3 class="font-bold text-xl text-[var(--fg)]" style="font-family: 'Space Grotesk';">Controls</h3>
+      </div>
+      <button class="tool-btn" onclick="closeModal('helpModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="help-grid">
+      <div class="help-item"><span>Next slide</span><kbd>→ / Space</kbd></div>
+      <div class="help-item"><span>Previous slide</span><kbd>←</kbd></div>
+      <div class="help-item"><span>First slide</span><kbd>Home</kbd></div>
+      <div class="help-item"><span>Last slide</span><kbd>End</kbd></div>
+      <div class="help-item"><span>Search</span><kbd>Ctrl+K</kbd></div>
+      <div class="help-item"><span>Glossary</span><kbd>G</kbd></div>
+      <div class="help-item"><span>References</span><kbd>R</kbd></div>
+      <div class="help-item"><span>Speaker notes</span><kbd>N</kbd></div>
+      <div class="help-item"><span>Fullscreen</span><kbd>F</kbd></div>
+      <div class="help-item"><span>Quiz answer</span><kbd>1-4</kbd></div>
+      <div class="help-item"><span>Print / PDF</span><kbd>Ctrl+P</kbd></div>
+      <div class="help-item"><span>This help</span><kbd>?</kbd></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// =============== DATA ===============
+const stageData = {
+  plan: {
+    name: 'PLAN', color: 'accent',
+    objective: 'Define requirements, threat model, and security acceptance criteria',
+    activities: ['Requirements gathering', 'Risk assessment', 'Threat modeling (STRIDE)', 'Security user stories', 'Compliance mapping'],
+    controls: ['Threat model artifacts', 'Security acceptance criteria', 'Risk register'],
+    attacks: ['Requirements manipulation', 'Missing threat scenarios', 'Compliance gaps'],
+    vulns: ['Undefined trust boundaries', 'Missing non-functional reqs'],
+    mitre: 'T1595 — Active Scanning (during recon)',
+    tools: ['OWASP Threat Dragon', 'IriusRisk', 'STRIDE', 'CASTR'],
+    bestPractice: 'Threat model every new feature; revisit quarterly'
+  },
+  code: {
+    name: 'CODE', color: 'accent',
+    objective: 'Write secure code, detect issues at the earliest possible moment',
+    activities: ['Secure coding', 'Pre-commit hooks', 'IDE plugins', 'Code review'],
+    controls: ['SAST in IDE', 'Secret scanning', 'Linting rules', 'Secure coding standards'],
+    attacks: ['Hardcoded secrets', 'Logic flaws', 'Injection flaws', 'Insecure crypto'],
+    vulns: ['OWASP A03 Injection', 'CWE-798 hardcoded creds', 'CWE-89 SQLi'],
+    mitre: 'T1552.001 — Credentials In Files',
+    tools: ['SonarQube', 'Semgrep', 'CodeQL', 'GitGuardian', 'Gitleaks'],
+    bestPractice: 'Pre-commit hooks block secrets before they reach the repo'
+  },
+  build: {
+    name: 'BUILD', color: 'accent',
+    objective: 'Compile, package, and scan artifacts reproducibly',
+    activities: ['Compilation', 'Dependency resolution', 'Container build', 'Artifact signing'],
+    controls: ['Reproducible builds', 'SBOM generation', 'Container scanning', 'Provenance attestation'],
+    attacks: ['Build server compromise', 'Dependency confusion', 'Typosquatting'],
+    vulns: ['CVE in dependencies', 'Backdoored packages', 'Insecure base images'],
+    mitre: 'T1195.002 — Compromise Software Supply Chain',
+    tools: ['Trivy', 'Grype', 'Syft', 'Cosign', 'SLSA Provenance', 'Buildkit'],
+    bestPractice: 'Pin dependencies by hash; verify signatures before consumption'
+  },
+  test: {
+    name: 'TEST', color: 'accent',
+    objective: 'Verify security behavior through dynamic and automated testing',
+    activities: ['Unit/integration tests', 'DAST', 'Fuzzing', 'Pen testing', 'API security testing'],
+    controls: ['DAST scanning', 'Fuzz testing', 'Security regression tests', 'Pen tests'],
+    attacks: ['Runtime injection', 'Auth bypass', 'Business logic flaws', 'API abuse'],
+    vulns: ['OWASP A01 BOLA', 'OWASP A04 XXE', 'OWASP A06 Vulnerable Components'],
+    mitre: 'T1190 — Exploit Public-Facing Application',
+    tools: ['OWASP ZAP', 'Burp Suite', 'Nuclei', 'ffuf', 'Postman Security'],
+    bestPractice: 'DAST in staging on every PR; full scan nightly'
+  },
+  release: {
+    name: 'RELEASE', color: 'accent-2',
+    objective: 'Approve, sign, and prepare artifacts for deployment',
+    activities: ['Approval gates', 'Artifact signing', 'SBOM publish', 'Change advisory'],
+    controls: ['Code signing', 'Provenance attestation', 'Approval workflow', 'Compliance evidence'],
+    attacks: ['Unauthorized release', 'Tampered artifact', 'Forged signature'],
+    vulns: ['Unsigned artifacts', 'No provenance', 'Weak signing keys'],
+    mitre: 'T1195.002 — Compromise Software Supply Chain',
+    tools: ['Cosign', 'Sigstore', 'in-toto', 'Rekor', 'Notation'],
+    bestPractice: 'Every artifact signed with ephemeral keys via OIDC'
+  },
+  deploy: {
+    name: 'DEPLOY', color: 'accent-2',
+    objective: 'Roll out changes safely with rollback capability',
+    activities: ['Blue-green', 'Canary', 'IaC apply', 'Configuration management', 'Admission control'],
+    controls: ['Admission policies (OPA/Kyverno)', 'IaC scanning', 'Network policies', 'Gradual rollout'],
+    attacks: ['Misconfiguration', 'Privilege escalation', 'Lateral movement', 'Resource hijacking'],
+    vulns: ['CWE-269 Improper Privilege Management', 'Open security groups', 'Public storage'],
+    mitre: 'T1078.004 — Valid Accounts: Cloud Accounts',
+    tools: ['ArgoCD', 'Checkov', 'OPA Gatekeeper', 'Kyverno', 'Terraform'],
+    bestPractice: 'Admission controllers enforce Pod Security Standards at deploy time'
+  },
+  operate: {
+    name: 'OPERATE', color: 'accent-2',
+    objective: 'Run securely in production with continuous protection',
+    activities: ['Runtime protection', 'Incident response', 'Patching', 'Access management'],
+    controls: ['EDR/XDR', 'Runtime security (Falco)', 'Patching cadence', 'JIT access'],
+    attacks: ['Container escape', 'Cryptominer injection', 'Privilege escalation', 'Data exfiltration'],
+    vulns: ['CWE-269 Priv Esc', 'CWE-78 OS Command Injection', 'CWE-502 Deserialization'],
+    mitre: 'T1611 — Escape to Host',
+    tools: ['Falco', 'Aqua', 'Sysdig', 'CrowdStrike', 'AWS GuardDuty'],
+    bestPractice: 'Runtime detection + automated isolation within 30s of suspicious behavior'
+  },
+  monitor: {
+    name: 'MONITOR', color: 'accent-2',
+    objective: 'Detect, respond, and feed learnings back to planning',
+    activities: ['SIEM correlation', 'Threat hunting', 'Log analysis', 'Anomaly detection', 'Feedback loops'],
+    controls: ['SIEM', 'SOAR playbooks', 'Audit logging', 'Compliance dashboards'],
+    attacks: ['Detection evasion', 'Log tampering', 'Slow exfiltration', 'Living-off-the-land'],
+    vulns: ['CWE-778 Insufficient Logging', 'CWE-22 Path Traversal in logs'],
+    mitre: 'T1562.002 — Impair Defenses: Disable Windows Event Logging',
+    tools: ['Splunk', 'Elastic Security', 'Sentinel', 'Chronicle', 'Datadog'],
+    bestPractice: 'MTTR < 30min for critical alerts; auto-isolate confirmed threats'
+  }
+};
+
+const speakerNotes = {
+  1: 'Welcome to the DevSecOps keynote. Use arrow keys to navigate, ? for shortcuts. Today we explore how DevOps principles integrate with cybersecurity to form DevSecOps — a culture, practice, and toolchain for secure continuous delivery.',
+  2: 'Quick agenda overview. 15 modules covering DevOps foundations, the security imperative, DevSecOps principles, lifecycle integration, CI/CD, containers, IaC, cloud, supply chain, automation, tools, case studies, best practices, and interactive learning.',
+  3: 'Module 1 begins. Before securing DevOps, we must understand what DevOps is — its origins, lifecycle, principles.',
+  4: 'Definition slide. Three pillars: Culture, Practice, Tools. DORA elite performers deploy 200x more frequently with 7x lower change fail rate. DevOps is a culture, not a team.',
+  5: 'Evolution from Waterfall (1970s) → Agile (2001) → DevOps (2009). Waterfall was sequential and rigid. Agile introduced iterations. DevOps added automation, continuous delivery, dissolved dev/ops silos.',
+  6: 'Side-by-side comparison. Note that security involvement evolved from "pre-release audit" to "embedded, automated". This is the core shift DevSecOps embodies.',
+  7: 'The DevOps infinity loop. 8 stages: Plan → Code → Build → Test → Release → Deploy → Operate → Monitor. Left = DEV, right = OPS. Continuous feedback. CALMS: Culture, Automation, Lean, Measurement, Sharing.',
+  8: 'Module 2 — the problem. Why traditional security can\'t keep up with DevOps velocity.',
+  9: 'Modern attack landscape. $4.88M average breach cost, 277 days to identify, 741% supply chain growth. 82% of breaches involve a human element.',
+  10: 'Module 3 — the solution. DevSecOps integrates security as a first-class citizen.',
+  11: 'Shift Left vs Shift Right. Both required. Shift left prevents (cheaper). Shift right detects & responds. The $1 prevention / $10 detection / $100 response ratio is the economic argument.',
+  12: 'Secure SDLC pipeline. Security gates (red) interspersed between dev stages. Each gate automated, each failure actionable. Security as Code, Continuous Security, Continuous Compliance.',
+  13: 'Interactive lifecycle. Click each stage card to see objectives, activities, security controls, attack vectors, vulnerabilities, MITRE ATT&CK mappings, tools, and best practices.',
+  14: 'Deep dive on CODE stage. DFD shows how a hardcoded secret leaks. Defensive controls (pre-commit, secret scan, vault) shown above. MITRE ATT&CK T1552.001 mapped.',
+  15: 'Module 6 — CI/CD with security checkpoints. Each red gate is automated. Pulse animation shows flow. Security is built-in, not bolted-on.',
+  16: 'Kubernetes architecture with attack paths. Privileged pod can mount docker.sock and escape to host. Defense: Pod Security Standards, RBAC, Network Policies, Admission Controllers, Runtime protection.',
+  17: 'IaC security. Misconfigurations are the #1 cloud breach cause. DFD: developer → misconfig → terraform apply → exposed resource → attacker. Tools: Checkov, tfsec, KICS, Terrascan.',
+  18: 'Cloud DevSecOps across AWS, Azure, GCP. CSPM, CWPP, CNAPP, CIEM categories. SSRF to IMDS is a classic cloud attack vector.',
+  19: 'Supply chain security. Map shows all attack points from developer to customer. SolarWinds, Log4Shell, XZ Utils are canonical examples. SLSA + Sigstore are the modern defense framework.',
+  20: 'Security automation with SOAR. Phishing response playbook: email → SIEM → SOAR → enrich/quarantine/block/reset. AI/LLM layer adds classification and IOC extraction. Reduces MTTR from hours to minutes.',
+  21: 'Tool ecosystem. 25 representative tools across 12 categories. The landscape has hundreds — focus on category understanding, not memorization.',
+  22: 'Case studies. Click any card to see details. Each breach teaches a specific DevSecOps lesson. Capital One = SSRF + IAM. Equifax = unpatched vuln. SolarWinds = build compromise. Uber = MFA fatigue.',
+  23: 'Maturity model. L1 Manual → L2 Defined → L3 Managed → L4 Optimized. Most organizations are at L2. The goal is L3 (automated) with L4 capabilities in critical areas.',
+  24: 'Quiz 1. Answer: C — SAST in IDE is the canonical shift-left practice. DAST in production is shift-right.',
+  25: 'Quiz 2. Answer: B — SolarWinds was a build pipeline compromise (SUNBURST backdoor injected during build).',
+  26: 'Quiz 3. Answer: C — Secret scanners (GitGuardian, Gitleaks) are purpose-built for hardcoded credentials.',
+  27: 'Quiz 4. Answer: B — Pod Security Standards (restricted) + admission controller is preventive. Falco is detective.',
+  28: 'Quiz 5. Answer: C — SLSA provides graduated levels (L1-L4) for supply chain integrity.',
+  29: 'Code: secure GitHub Actions pipeline. Explicit permissions, OIDC keyless auth, multiple scanners, SBOM generation, Cosign signing.',
+  30: 'Dockerfile secure vs insecure. Side-by-side. Key hardening: non-root user, multi-stage build, pinned digest, dropped capabilities, read-only filesystem, OCI labels.',
+  31: 'References slide. All these frameworks and organizations provide free, authoritative guidance. NIST SP 800-218 SSDF is the foundational DevSecOps document.',
+  32: 'Closing slide. DevSecOps is a culture, not a tool. Make security a shared responsibility embedded in every commit, build, and release. Open the floor for questions.'
+};
+
+const glossaryTerms = [
+  {term: 'DevOps', def: 'Cultural + technical practices unifying development and operations for faster, reliable delivery.'},
+  {term: 'DevSecOps', def: 'Embedding security as a shared responsibility throughout the DevOps lifecycle.'},
+  {term: 'Shift Left', def: 'Moving security testing earlier in the SDLC — design, code, pre-commit.'},
+  {term: 'Shift Right', def: 'Runtime security: monitoring, detection, response in production.'},
+  {term: 'SAST', def: 'Static Application Security Testing — analyzes source code without execution.'},
+  {term: 'DAST', def: 'Dynamic Application Security Testing — tests running app from outside.'},
+  {term: 'SCA', def: 'Software Composition Analysis — scans dependencies for known CVEs.'},
+  {term: 'IaC', def: 'Infrastructure as Code — declarative provisioning via code (Terraform, etc.).'},
+  {term: 'SBOM', def: 'Software Bill of Materials — machine-readable inventory of components.'},
+  {term: 'Zero Trust', def: '"Never trust, always verify" — every request authenticated & authorized.'},
+  {term: 'SLSA', def: 'Supply-chain Levels for Software Artifacts — graduated integrity framework (L1-L4).'},
+  {term: 'SOAR', def: 'Security Orchestration, Automation & Response — automates playbooks.'},
+  {term: 'SIEM', def: 'Security Information & Event Management — centralized log analysis + alerting.'},
+  {term: 'CSPM', def: 'Cloud Security Posture Management — continuous misconfig detection.'},
+  {term: 'CWPP', def: 'Cloud Workload Protection Platform — runtime protection for VMs/containers.'},
+  {term: 'CNAPP', def: 'Cloud-Native Application Protection — unified CSPM + CWPP + CIEM.'},
+  {term: 'CIEM', def: 'Cloud Infrastructure Entitlement Management — least-privilege enforcement.'},
+  {term: 'OIDC', def: 'OpenID Connect — keyless authentication for cloud-native workflows.'},
+  {term: 'RBAC', def: 'Role-Based Access Control — permission via roles, not individuals.'},
+  {term: 'MITRE ATT&CK', def: 'Adversarial tactics, techniques, and procedures knowledge base.'},
+  {term: 'Sigstore', def: 'Software signing system (Cosign, Rekor, Fulcio) for supply chain integrity.'},
+  {term: 'in-toto', def: 'Framework to secure software supply chain integrity end-to-end.'},
+  {term: 'Cosign', def: 'Container/OCI artifact signing tool from Sigstore project.'},
+  {term: 'Falco', def: 'CNCF runtime security tool — syscall-based threat detection for K8s.'},
+  {term: 'OPA', def: 'Open Policy Agent — general-purpose policy engine (Rego language).'},
+  {term: 'Kyverno', def: 'Kubernetes-native policy engine, no separate policy language.'}
+];
+
+const caseStudies = {
+  solarwinds: {
+    title: 'SOLARWINDS',
+    timeline: ['Sep 2019 — Attacker infiltrates build env', 'Feb 2020 — Trojaned update shipped', 'Dec 2020 — FireEye discloses breach'],
+    root: 'Compromised build server, no provenance verification, weak code-signing process.',
+    mitigation: 'Reproducible builds, SLSA L3+ provenance, SBOM, Sigstore signing, network segmentation.',
+    lesson: 'Trust in your build pipeline is trust in your product.'
+  },
+  capitalone: {
+    title: 'CAPITAL ONE',
+    timeline: ['Mar 2019 — Attacker exploits SSRF via misconfigured WAF', 'Jul 2019 — Breach discovered', 'Aug 2019 — Suspect arrested'],
+    root: 'SSRF vulnerability + over-permissive IAM role allowed metadata service access and S3 read.',
+    mitigation: 'IMDSv2 enforcement, restrict SSRF, least-privilege IAM, WAF rules, network segmentation.',
+    lesson: 'Cloud-native attacks chain multiple weaknesses — defense in depth is mandatory.'
+  },
+  equifax: {
+    title: 'EQUIFAX',
+    timeline: ['Mar 2017 — CVE-2017-5638 disclosed', 'May 2017 — Exploitation begins', 'Sep 2017 — Public disclosure'],
+    root: 'Apache Struts vulnerability unpatched for months. Failed vulnerability scanning and asset inventory.',
+    mitigation: 'Automated patch management, SCA scanning, asset inventory, WAF virtual patching.',
+    lesson: 'Knowing your dependencies is as important as knowing your code.'
+  },
+  codecov: {
+    title: 'CODECOV',
+    timeline: ['Jan 2021 — Script modified by attacker', 'Apr 2021 — Breach discovered', 'Apr 2021 — Customer tokens revoked'],
+    root: 'Bash uploader script tampered for 2 months. Leaked CI environment variables from thousands of customers.',
+    mitigation: 'Code signing of scripts, immutable build artifacts, secret rotation, CI token scoping.',
+    lesson: 'Third-party CI tools are a high-value target — treat them as part of your trust boundary.'
+  },
+  uber: {
+    title: 'UBER',
+    timeline: ['Sep 2022 — MFA fatigue attack on contractor', 'Oct 2022 — Attacker accesses AWS, secrets, code', 'Oct 2022 — Public disclosure'],
+    root: 'MFA fatigue (push bombing), hardcoded PowerShell script with admin credentials, broad IAM access.',
+    mitigation: 'Phishing-resistant MFA (FIDO2), secret scanning, JIT access, network segmentation.',
+    lesson: 'Identity is the new perimeter — and hardcoded credentials still haunt us.'
+  },
+  okta: {
+    title: 'OKTA / LAPSUS$',
+    timeline: ['Jan 2022 — Sitel (subcontractor) compromised', 'Mar 2022 — Screenshots leaked by Lapsus$', 'Mar 2022 — Okta disclosure'],
+    root: 'Subcontractor account compromised via social engineering. Access to Okta admin console exposed.',
+    mitigation: 'Vendor risk management, JIT admin access, session recording, anomaly detection.',
+    lesson: 'Your supply chain includes your subcontractors — extend security beyond corporate boundaries.'
+  }
+};
+
+// =============== STATE ===============
+let currentIdx = 0;
+const slides = Array.from(document.querySelectorAll('.slide'));
+const totalSlides = slides.length;
+document.getElementById('totalSlides').textContent = totalSlides;
+const visited = new Set([0]);
+
+// =============== NAVIGATION ===============
+function goToSlide(idx) {
+  if (idx < 0 || idx >= totalSlides) return;
+  slides.forEach((s, i) => {
+    s.classList.remove('active', 'prev');
+    if (i === idx) s.classList.add('active');
+    else if (i < idx) s.classList.add('prev');
+  });
+  currentIdx = idx;
+  visited.add(idx);
+  updateProgress();
+  updateDots();
+  updateCounter();
+  updateNotes();
+  // Re-highlight code in newly visible slide
+  setTimeout(() => {
+    if (window.Prism) {
+      const active = slides[idx];
+      Prism.highlightAllUnder(active);
+    }
+  }, 50);
+}
+
+function nextSlide() { if (currentIdx < totalSlides - 1) goToSlide(currentIdx + 1); }
+function prevSlide() { if (currentIdx > 0) goToSlide(currentIdx - 1); }
+function homeSlide() { goToSlide(0); }
+
+function updateProgress() {
+  const pct = ((currentIdx + 1) / totalSlides) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function updateCounter() {
+  document.getElementById('currentSlide').textContent = currentIdx + 1;
+}
+
+function updateDots() {
+  const dotsContainer = document.getElementById('dots');
+  if (!dotsContainer.children.length) {
+    slides.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'dot';
+      d.addEventListener('click', () => goToSlide(i));
+      dotsContainer.appendChild(d);
+    });
+  }
+  Array.from(dotsContainer.children).forEach((d, i) => {
+    d.classList.toggle('active', i === currentIdx);
+    d.classList.toggle('visited', visited.has(i) && i !== currentIdx);
+  });
+}
+
+function updateNotes() {
+  const notes = speakerNotes[currentIdx + 1] || 'No speaker notes for this slide.';
+  document.getElementById('notesContent').textContent = notes;
+}
+
+// =============== STAGE CARDS ===============
+function renderStage(stage) {
+  const d = stageData[stage];
+  const detail = document.getElementById('stageDetail');
+  if (!detail) return;
+  detail.innerHTML = `
+    <div class="col-span-5 glass-strong p-5">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-12 h-12 rounded-xl bg-[rgba(8,145,178,0.1)] grid place-items-center text-[var(--accent)] text-xl"><i class="fa-solid fa-${stage === 'plan' ? 'lightbulb' : stage === 'code' ? 'code' : stage === 'build' ? 'hammer' : stage === 'test' ? 'vial' : stage === 'release' ? 'rocket' : stage === 'deploy' ? 'server' : stage === 'operate' ? 'gears' : 'chart-line'}"></i></div>
+        <div>
+          <div class="font-mono text-xs text-[var(--accent)]">${stage.toUpperCase()} STAGE</div>
+          <div class="font-semibold text-xl text-[var(--fg)]">Objective</div>
+        </div>
+      </div>
+      <p class="text-sm text-[var(--fg-dim)] mb-4">${d.objective}</p>
+      <div class="grid grid-cols-2 gap-3">
+        <div><div class="font-mono text-xs text-[var(--accent)] mb-1">ACTIVITIES</div><ul class="text-xs text-[var(--fg-dim)] space-y-1">${d.activities.map(a => `<li>• ${a}</li>`).join('')}</ul></div>
+        <div><div class="font-mono text-xs text-[var(--accent-2)] mb-1">CONTROLS</div><ul class="text-xs text-[var(--fg-dim)] space-y-1">${d.controls.map(a => `<li>• ${a}</li>`).join('')}</ul></div>
+      </div>
+    </div>
+    <div class="col-span-4 space-y-3">
+      <div class="glass p-4">
+        <div class="text-[var(--accent-3)] font-mono text-xs mb-2">ATTACK VECTORS</div>
+        <ul class="text-xs text-[var(--fg-dim)] space-y-1">${d.attacks.map(a => `<li>▸ ${a}</li>`).join('')}</ul>
+      </div>
+      <div class="glass p-4">
+        <div class="text-[var(--accent-4)] font-mono text-xs mb-2">VULNERABILITIES</div>
+        <ul class="text-xs text-[var(--fg-dim)] space-y-1">${d.vulns.map(a => `<li>▸ ${a}</li>`).join('')}</ul>
+      </div>
+    </div>
+    <div class="col-span-3 space-y-3">
+      <div class="glass p-4">
+        <div class="text-[var(--accent-5)] font-mono text-xs mb-2">MITRE ATT&CK</div>
+        <div class="text-xs text-[var(--fg-dim)]">${d.mitre}</div>
+      </div>
+      <div class="glass p-4">
+        <div class="text-[var(--accent)] font-mono text-xs mb-2">TOOLS</div>
+        <div class="flex flex-wrap gap-1">${d.tools.map(t => `<span class="badge">${t}</span>`).join('')}</div>
+      </div>
+      <div class="glass p-4 border-l-2" style="border-left-color: var(--accent-2);">
+        <div class="text-[var(--accent-2)] font-mono text-xs mb-2">BEST PRACTICE</div>
+        <div class="text-xs text-[var(--fg-dim)]">${d.bestPractice}</div>
+      </div>
+    </div>
+  `;
+}
+
+document.querySelectorAll('.stage-card').forEach(card => {
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.stage-card').forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+    renderStage(card.dataset.stage);
+  });
+});
+
+// Initialize stage detail with PLAN
+renderStage('plan');
+
+// =============== QUIZ ===============
+let quizScore = 0;
+function checkAnswer(opt) {
+  const options = opt.parentElement.querySelectorAll('.quiz-option');
+  // Disable further clicks
+  options.forEach(o => o.style.pointerEvents = 'none');
+  
+  const isCorrect = opt.dataset.correct === 'true';
+  const feedback = opt.parentElement.parentElement.querySelector('[id^="quizFeedback"]');
+  
+  if (isCorrect) {
+    opt.classList.add('correct');
+    quizScore++;
+    if (feedback) {
+      feedback.innerHTML = '<i class="fa-solid fa-check-circle text-[var(--accent-2)]"></i> <span class="text-[var(--accent-2)]">Correct!</span> Well done.';
+      feedback.classList.remove('hidden');
+    }
+    showToast('✓ Correct answer!');
+  } else {
+    opt.classList.add('wrong');
+    // Highlight the correct one
+    options.forEach(o => {
+      if (o.dataset.correct === 'true') o.classList.add('correct');
+    });
+    if (feedback) {
+      feedback.innerHTML = '<i class="fa-solid fa-circle-xmark text-[var(--accent-3)]"></i> <span class="text-[var(--accent-3)]">Not quite.</span> The correct answer is highlighted in green.';
+      feedback.classList.remove('hidden');
+    }
+    showToast('✗ Incorrect — see correct answer');
+  }
+  
+  // Update score display in current slide
+  const scoreEl = opt.closest('.slide').querySelector('.text-\\[var\\(--accent\\)\\]');
+  if (scoreEl) scoreEl.textContent = quizScore;
+}
+window.checkAnswer = checkAnswer;
+
+// =============== CASE STUDIES ===============
+function showCaseStudy(name) {
+  const cs = caseStudies[name];
+  if (!cs) return;
+  const detail = document.getElementById('caseDetail');
+  detail.innerHTML = `
+    <div class="text-[var(--accent)] font-mono text-xs mb-2">SELECTED CASE: ${cs.title}</div>
+    <div class="grid grid-cols-2 gap-4 text-xs text-[var(--fg)]">
+      <div><div class="text-[var(--fg-dim)] mb-1">TIMELINE</div><div class="space-y-1 text-[var(--fg-dim)]">${cs.timeline.map(t => `<div>• ${t}</div>`).join('')}</div></div>
+      <div><div class="text-[var(--fg-dim)] mb-1">ROOT CAUSE</div><div class="text-[var(--fg-dim)]">${cs.root}</div></div>
+      <div><div class="text-[var(--fg-dim)] mb-1">DEVSECOPS MITIGATION</div><div class="text-[var(--fg-dim)]">${cs.mitigation}</div></div>
+      <div><div class="text-[var(--fg-dim)] mb-1">LESSON</div><div class="text-[var(--fg-dim)]">${cs.lesson}</div></div>
+    </div>
+  `;
+}
+window.showCaseStudy = showCaseStudy;
+
+// =============== MODALS ===============
+function openModal(id) {
+  document.getElementById(id).classList.add('show');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+window.closeModal = closeModal;
+
+function toggleNotes() {
+  document.getElementById('notesPanel').classList.toggle('show');
+}
+window.toggleNotes = toggleNotes;
+
+function downloadNotes() {
+  const notes = Object.entries(speakerNotes).map(([i, n]) => `--- Slide ${i} ---\n${n}\n`).join('\n');
+  const blob = new Blob([notes], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'devsecops-speaker-notes.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Speaker notes downloaded');
+}
+window.downloadNotes = downloadNotes;
+
+// =============== GLOSSARY ===============
+function buildGlossary() {
+  const container = document.getElementById('glossaryContent');
+  container.innerHTML = glossaryTerms.map(g => `
+    <div class="glass p-4">
+      <div class="font-semibold text-sm text-[var(--accent)] mb-1">${g.term}</div>
+      <div class="text-xs text-[var(--fg-dim)]">${g.def}</div>
+    </div>
+  `).join('');
+}
+buildGlossary();
+
+// =============== SEARCH ===============
+function buildSearch(query) {
+  const results = document.getElementById('searchResults');
+  const q = query.toLowerCase().trim();
+  if (!q) {
+    results.innerHTML = '<div class="text-center text-[var(--fg-mute)] text-sm py-8">Type to search slides...</div>';
+    return;
+  }
+  const matches = slides.map((s, i) => {
+    const title = s.dataset.title || '';
+    const text = s.textContent.toLowerCase();
+    if (title.toLowerCase().includes(q) || text.includes(q)) {
+      return { idx: i, title, snippet: getSnippet(text, q) };
+    }
+    return null;
+  }).filter(Boolean);
+  
+  if (!matches.length) {
+    results.innerHTML = '<div class="text-center text-[var(--fg-mute)] text-sm py-8">No matches found</div>';
+    return;
+  }
+  
+  results.innerHTML = matches.map(m => `
+    <div class="search-result" onclick="goToSlide(${m.idx}); closeModal('searchModal');">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-xs font-mono text-[var(--accent)]">SLIDE ${m.idx + 1}</div>
+          <div class="text-sm font-semibold text-[var(--fg)] mt-1">${m.title}</div>
+          <div class="text-xs text-[var(--fg-dim)] mt-1">${m.snippet}</div>
+        </div>
+        <i class="fa-solid fa-arrow-right text-[var(--accent)]"></i>
+      </div>
+    </div>
+  `).join('');
+}
+
+function getSnippet(text, q) {
+  const idx = text.indexOf(q);
+  if (idx === -1) return '';
+  const start = Math.max(0, idx - 40);
+  const end = Math.min(text.length, idx + q.length + 40);
+  return '...' + text.substring(start, end).replace(/\s+/g, ' ').trim() + '...';
+}
+
+// =============== TOAST ===============
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// =============== EVENT LISTENERS ===============
+document.getElementById('nextBtn').addEventListener('click', nextSlide);
+document.getElementById('prevBtn').addEventListener('click', prevSlide);
+document.getElementById('homeBtn').addEventListener('click', homeSlide);
+
+document.getElementById('searchBtn').addEventListener('click', () => {
+  openModal('searchModal');
+  setTimeout(() => document.getElementById('searchInput').focus(), 100);
+});
+document.getElementById('glossaryBtn').addEventListener('click', () => openModal('glossaryModal'));
+document.getElementById('refsBtn').addEventListener('click', () => openModal('refsModal'));
+document.getElementById('notesBtn').addEventListener('click', toggleNotes);
+document.getElementById('helpBtn').addEventListener('click', () => openModal('helpModal'));
+
+document.getElementById('fullscreenBtn').addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => showToast('Fullscreen not supported'));
+  } else {
+    document.exitFullscreen();
+  }
+});
+
+document.getElementById('searchInput').addEventListener('input', (e) => buildSearch(e.target.value));
+
+// Click outside modal to close
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', (e) => {
+    if (e.target === m) m.classList.remove('show');
+  });
+});
+
+// =============== KEYBOARD ===============
+document.addEventListener('keydown', (e) => {
+  // Don't interfere with typing in inputs
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+    if (e.key === 'Escape') e.target.blur();
+    return;
+  }
+  
+  // Close any open modal first
+  const openModal = document.querySelector('.modal-overlay.show');
+  if (openModal && e.key === 'Escape') {
+    openModal.classList.remove('show');
+    return;
+  }
+  
+  switch(e.key) {
+    case 'ArrowRight':
+    case ' ':
+      e.preventDefault();
+      nextSlide();
+      break;
+    case 'ArrowLeft':
+      e.preventDefault();
+      prevSlide();
+      break;
+    case 'Home':
+      e.preventDefault();
+      homeSlide();
+      break;
+    case 'End':
+      e.preventDefault();
+      goToSlide(totalSlides - 1);
+      break;
+    case 'g': case 'G':
+      e.preventDefault();
+      openModal('glossaryModal');
+      break;
+    case 'r': case 'R':
+      e.preventDefault();
+      openModal('refsModal');
+      break;
+    case 'n': case 'N':
+      e.preventDefault();
+      toggleNotes();
+      break;
+    case 'f': case 'F':
+      e.preventDefault();
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen();
+      }
+      break;
+    case '?':
+      e.preventDefault();
+      openModal('helpModal');
+      break;
+    case 'k': case 'K':
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        openModal('searchModal');
+        setTimeout(() => document.getElementById('searchInput').focus(), 100);
+      }
+      break;
+    case '1': case '2': case '3': case '4':
+      // Quiz answer selection
+      if (slides[currentIdx].dataset.title && slides[currentIdx].dataset.title.startsWith('Quiz')) {
+        e.preventDefault();
+        const idx = parseInt(e.key) - 1;
+        const opts = slides[currentIdx].querySelectorAll('.quiz-option');
+        if (opts[idx]) checkAnswer(opts[idx]);
+      }
+      break;
+  }
+});
+
+// =============== INIT ===============
+updateProgress();
+updateDots();
+updateCounter();
+updateNotes();
+
+// Initial Prism highlight
+setTimeout(() => {
+  if (window.Prism) Prism.highlightAll();
+}, 200);
+
+// Welcome toast
+setTimeout(() => showToast('Use → or Space to navigate · ? for shortcuts'), 800);
+
+console.log('%c🔐 DevSecOps Keynote Loaded', 'color: #0891b2; font-size: 14px; font-weight: bold;');
+console.log(`%c${totalSlides} slides ready. Use arrow keys to navigate.`, 'color: #475569;');
+</script>
+
+</body>
+</html>
